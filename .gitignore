@@ -1,1 +1,8 @@
 printfTester
+ft_printf.h.gch
+ft_printf.o
+libftprintf.a
+strings.c
+strings.o
+a.out
+
