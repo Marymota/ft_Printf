@@ -6,3 +6,5 @@ strings.c
 strings.o
 a.out
 
+.vscode/settings.json
+printfTester

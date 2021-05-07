@@ -86,32 +86,74 @@ int ft_putstr(char *str)
 	{
 		int len = ft_strlen(arg);
 		int i;
+		int aux;
 
 		
 		i = 0;
-		//printf("\ntest: %s %i\n", arg, flag->precision);
+		aux = flag->precision;
+		//printf("\ntest: %i == %i\n", flag->precision, len);
 		if (flag->precision == 0)
 			align(flag->width);
-		else if (flag->precision == len)
+		else if (flag->precision < len)
 		{
-			if (flag->width - len > 0)
-				align(flag->width - len);
-			i = ft_putstr(arg);
-		}
-		else if (flag->precision > len)
-		{
-			if (flag->width - len > 0)
-				align(flag->width - len);
-			i = ft_putstr(arg);
-		}
-		else
-		{
-			while (flag->precision--)
+			if (flag->left_align == 0)
 			{
-				ft_putchr(*arg++);
-				i++;
+				if (flag->width - flag->precision > 0)
+					align(flag->width - flag->precision);
+				aux = flag->precision;
+				while (aux--)
+				{
+					ft_putchr(*arg++);
+					++i;	
+				}
+			}
+			else if (flag->left_align == 1)
+			{
+				aux = flag->precision;
+				while (aux--)
+				{
+					ft_putchr(*arg++);
+					++i;	
+				}
+				if (flag->width - flag->precision > 0)
+					align(flag->width - flag->precision);
 			}
 		}
+		else if (flag->precision >= len)
+		{
+			if (flag->width >= flag->precision)
+			{
+				if (flag->left_align == 0)
+				{
+					if (flag->width - len > 0)
+						align(flag->width - len);
+					i = ft_putstr(arg);
+				}
+				else  if (flag->left_align == 1)
+				{
+					i = ft_putstr(arg);
+					if (flag->width - len > 0)
+						align(flag->width - len);
+				}
+			}
+			else if (flag->precision > flag->width)
+			{
+				if (flag->width == 0)
+					i = ft_putstr(arg);
+				else if (flag->left_align == 0)
+				{
+					//printf("\ntest: %i\n", len);
+						align(flag->precision - len);
+					i = ft_putstr(arg);
+				}
+				else if (flag->left_align == 1)
+				{
+						i = ft_putstr(arg);
+						align(flag->precision - len);
+				}
+			}
+		}
+		
 		return (i);
 	}
 
@@ -359,7 +401,7 @@ int ft_printf(const char *format, ...)
 	return (done);
 }
 
-//
+/*/
 int main (void)
 {
 	//%C
@@ -420,17 +462,29 @@ int main (void)
 	//printf("\n-----//TEST 16\n-------------------\n");
 	//printf("\nidx: %i\n", printf("%*.s%.1s", 10, "123", "4567"));
 	//printf("\nidx: %i\n", ft_printf("%*.s%.1s", 10, "123", "4567"));
-	printf("\n-----//TEST 17\n-------------------\n");
-	printf("\nidx: %i\n", printf("%*.0s%.2s", 10, "123", "4567"));
-	printf("\nidx: %i\n", ft_printf("%*.0s%.2s", 10, "123", "4567"));
-	printf("\n-----//TEST 18\n-------------------\n");
-	printf("\nidx: %i\n", printf("%*.3s%.3s", 10, "123", "4567"));
-	printf("\nidx: %i\n", ft_printf("%*.3s%.3s", 10, "123", "4567"));
-	printf("\n-----//TEST 19\n-------------------\n");
-	printf("\nidx: %i\n", printf("%*.4s%.4s", 10, "123", "4567"));
-	printf("\nidx: %i\n", ft_printf("%*.4s%.4s", 10, "123", "4567"));
-	printf("\n-----//TEST 22\n-------------------\n");
-	printf("\nidx: %i\n", printf("%*.5s%*.5s", -10, "123", 10, "4567"));
-	printf("\nidx: %i\n", ft_printf("%*.5s%*.5s", -10, "123", 10, "4567"));
+	//printf("\n-----//TEST 17\n-------------------\n");
+	//printf("\nidx: %i\n", printf("%*.0s%.2s", 10, "123", "4567"));
+	//printf("\nidx: %i\n", ft_printf("%*.0s%.2s", 10, "123", "4567"));
+	//printf("\n-----//TEST 18\n-------------------\n");
+	//printf("\nidx: %i\n", printf("%*.3s%.3s", 10, "123", "4567"));
+	//printf("\nidx: %i\n", ft_printf("%*.3s%.3s", 10, "123", "4567"));
+	printf("\n-----//TEST 20\n-------------------\n");
+	printf("\nidx: %i\n", printf(" %*.5s//%.5s/", 10, "123", "4567"));
+	printf("\nidx: %i\n", ft_printf(" %*.5s//%.5s/", 10, "123", "4567"));
+	//printf("\n-----//TEST 22\n-------------------\n");
+	//printf("\nidx: %i\n", printf("%*.5s%*.5s", -10, "123", 10, "4567"));
+	//printf("\nidx: %i\n", ft_printf("%*.5s%*.5s", -10, "123", 10, "4567"));
+	//printf("\n-----//TEST 28\n-------------------\n");
+	//printf("\nidx: %i\n", printf(" %3.3s %3.3s ","123", "4567"));
+	//printf("\nidx: %i\n", ft_printf(" %3.3s %3.3s ","123", "4567"));
+	//printf("\n-----//TEST 29\n-------------------\n");
+	//printf("\nidx: %i\n", printf(" %4.3s %-4.3s ","123", "4567"));
+	//printf("\nidx: %i\n", ft_printf(" %4.3s %-4.3s ","123", "4567"));
+	//printf("\n-----//TEST 32\n-------------------\n");
+	//printf("\nidx: %i\n", printf("%.1s", ""));
+	//printf("\nidx: %i\n", ft_printf("%.1s", ""));
+	//printf("\n-----//TEST 33\n-------------------\n");
+	//printf("\nidx: %i\n", printf("%4.2s%-4.2s","123", "4567"));
+	//printf("\nidx: %i\n", ft_printf("%4.2s%-4.2s","123", "4567"));
 }
-//
+/*/
