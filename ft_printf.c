@@ -13,7 +13,9 @@ printf() is called with a "format string" that specifies how to format the value
 
 */
 
-//INIT VARIABLES
+//	*** INIT VARIABLES ***
+//	Iniciate variables that are used 
+//	globally to their 'default' values
 void init(t_flags *flag)
 {
 	flag->width = 0;
@@ -22,140 +24,156 @@ void init(t_flags *flag)
 	flag->precision = -1;
 }
 
-//PRINTS
-//PRINTS / CHAR
+/*	*** PRINTS ***
+	Prints individual characters	*/
 int ft_putchr(char c)
 {
 	return (write(1, &c, 1));
 }
-
-void align(int w)
+	
+/*	Prints spaces to align content based on 
+	width, precision & alignement	*/
+void align(int len)
 {
-	while (w--)
+	while (len--)
 		ft_putchr(' ');
 }
 
-//PRINTS / STR
-
+/*	Measures the length of a string	*/
 int ft_strlen(const char *str)
 {
-	int i;
+	int	len;
 
-	i = 0; 
+	len = 0; 
 	while(*str++)
-		++i;
-	return(i);
+		++len;
+	return(len);
 }
 
+/*	Prints an entire string	*/
 int ft_putstr(char *str)
 {
-	char *ptr;
-	int i;
+	int		len;
 
- 	i = 0;
-	ptr = str;
-	while (*ptr)
+	len = ft_strlen(str);
+	while (*str)
 	{
-		if (*ptr && *ptr != '\0')
-		{
-			ft_putchr(*ptr);
-		}
-		++ptr;
+		if (*str && *str != '\0')
+			ft_putchr(*str++);
 	}
-	i += ft_strlen(str);
+	return (len);
+}
+
+int pft_print_prec(char *arg, t_flags *flag, int size)
+{
+	int idx;
+
+	idx = 0;
+	if (flag->width == 0)
+		idx = ft_putstr(arg);
+	else if (flag->left_align == 0)
+	{
+		if (size > 0)
+			align(size);
+		idx = ft_putstr(arg);
+	}
+	else  if (flag->left_align == 1)
+	{
+		idx = ft_putstr(arg);
+		if (size > 0)
+			align(size);
+	}
+	return (idx);
+}
+
+int pft_truncate(char *arg, t_flags *flag)
+{
+	int idx;
+	int count_precision;
+	int precision;
+	int width;
+	
+	idx = 0;
+	count_precision = flag->precision;
+	precision = flag->precision;
+	width = flag->width;
+	if (flag->left_align == 0)
+	{
+		if (width - precision > 0)
+			align(width - precision);
+		while (count_precision--)
+		{
+			ft_putchr(*arg++);
+			++idx;	
+		}
+	}
+	else if (flag->left_align == 1)
+	{
+		while (count_precision--)
+		{
+			ft_putchr(*arg++);
+			++idx;	
+		}
+		if (width - precision > 0)
+			align(width - precision);
+	}
+	return (idx);
+}
+
+/*	Prints the extra width after 
+subtracting the content length */
+int print_width (char *arg, t_flags *flag)
+{
+	int	i;
+	int	len;
+
+	i = 0;
+	len = ft_strlen(arg);
+	flag->width = flag->width - len;
+	if (flag->width > 0)
+	{
+		i = flag->width;
+		align(flag->width);
+	}
 	return (i);
 }
 
-	int print_width (char *arg, t_flags *flag)
+int print_precision (char *arg, t_flags *flag)
+{
+	int idx;
+	int len;
+	int precision;
+	int width;
+	int size;
+	
+	idx = 0;
+	len = ft_strlen(arg);
+	precision = flag->precision;
+	width = flag->width;
+	size = 0;
+	/*	If precision is less than the length
+	of the string, the string will be truncate */
+	if (precision < len)
 	{
-		int i;
-		int len;
-
-		i = 0;
-		len = ft_strlen(arg);
-		flag->width = flag->width - len;
-		if (flag->width > 0)
-		{
-			i = flag->width;
-			align(flag->width);
-		}
-		return (i);
+		idx = pft_truncate(arg, flag);
 	}
-
-	int print_precision (char *arg, t_flags *flag)
+	else if (precision >= len)
 	{
-		int len = ft_strlen(arg);
-		int i;
-		int aux;
-
-		
-		i = 0;
-		aux = flag->precision;
-		//printf("\ntest: %i == %i\n", flag->precision, len);
-		if (flag->precision == 0)
-			align(flag->width);
-		else if (flag->precision < len)
+		if (precision < width)
 		{
-			if (flag->left_align == 0)
-			{
-				if (flag->width - flag->precision > 0)
-					align(flag->width - flag->precision);
-				aux = flag->precision;
-				while (aux--)
-				{
-					ft_putchr(*arg++);
-					++i;	
-				}
-			}
-			else if (flag->left_align == 1)
-			{
-				aux = flag->precision;
-				while (aux--)
-				{
-					ft_putchr(*arg++);
-					++i;	
-				}
-				if (flag->width - flag->precision > 0)
-					align(flag->width - flag->precision);
-			}
+			size = width - len;
+			idx = pft_print_prec(arg, flag, size);
 		}
-		else if (flag->precision >= len)
+		else if (precision >= width)
 		{
-			if (flag->width >= flag->precision)
-			{
-				if (flag->left_align == 0)
-				{
-					if (flag->width - len > 0)
-						align(flag->width - len);
-					i = ft_putstr(arg);
-				}
-				else  if (flag->left_align == 1)
-				{
-					i = ft_putstr(arg);
-					if (flag->width - len > 0)
-						align(flag->width - len);
-				}
-			}
-			else if (flag->precision > flag->width)
-			{
-				if (flag->width == 0)
-					i = ft_putstr(arg);
-				else if (flag->left_align == 0)
-				{
-					//printf("\ntest: %i\n", len);
-						align(flag->precision - len);
-					i = ft_putstr(arg);
-				}
-				else if (flag->left_align == 1)
-				{
-						i = ft_putstr(arg);
-						align(flag->precision - len);
-				}
-			}
+			size = precision - len;
+			idx = pft_print_prec(arg, flag, size);
 		}
-		
-		return (i);
+		else if (precision == 0)
+			align(width);
 	}
+	return (idx);
+}
 
 //PRINTS / PRINT_SPECIFIERS
 
@@ -404,87 +422,6 @@ int ft_printf(const char *format, ...)
 /*/
 int main (void)
 {
-	//%C
-	//printf("\n-----//TEST 4\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%10c", '0'));
-	//printf("\nidx: %i\n", ft_printf("%10c", '0'));
 
-	//printf("\n-----//TEST 8\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%*c", 1, '0'));
-	//printf("\nidx: %i\n", ft_printf("%*c", 1, '0'));
-//
-	//printf("\n-----//TEST 11\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%*c", -2, '0'));
-	//printf("\nidx: %i\n", ft_printf("%*c", -2, '0'));
-//
-	//printf("\n-----//TEST 17\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%*c%c*", -10, '0', 1));
-	//printf("\nidx: %i\n", ft_printf("%*c%c*", -10, '0', 1));
-
-	//%S
-	//printf("\n-----//TEST 1\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%s", ""));
-	//printf("\nidx: %i\n", ft_printf("%s", ""));
-	//printf("\n-----//TEST 2\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%s", "0"));
-	//printf("\nidx: %i\n", ft_printf("%s", "0"));
-	//printf("\n-----//TEST 3\n-------------------\n");
-	//// Empty values cause over-counting; Add strlen()
-	//printf("\nidx: %i\n", printf("%s %s", "", ""));
-	//printf("\nidx: %i\n", ft_printf("%s %s", "", ""));
-	//printf("\n-----//TEST 4\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%s %s", "0", "1"));
-	//printf("\nidx: %i\n", ft_printf("%s %s", "0", "1"));
-	//printf("\n-----//TEST 5\n-------------------\n");
-	//printf("\nidx: %i\n", printf(" %s %s ", "0", "1"));
-	//printf("\nidx: %i\n", ft_printf(" %s %s ", "0", "1"));
-	//printf("\n-----//TEST 6\n-------------------\n");
-	//printf("\nidx: %i\n", printf(" %s %s ", "", ""));
-	//printf("\nidx: %i\n", ft_printf(" %s %s ", "", ""));
-	//printf("\n-----//TEST 7\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%1s%1s", "123", "4567"));
-	//printf("\nidx: %i\n", ft_printf("%1s%1s", "123", "4567"));
-	//printf("\n-----//TEST 8\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%4s%4s", "123", "4567"));
-	//printf("\nidx: %i\n", ft_printf("%4s%4s", "123", "4567"));
-	//printf("\n-----//TEST 9\n-------------------\n");
-	//printf("\nidx: %i\n", printf(" %-4s %4s ", "123", "4567"));
-	//printf("\nidx: %i\n", ft_printf(" %-4s %4s ", "123", "4567"));
-	//printf("\n-----//TEST 10\n-------------------\n");
-	//printf("\nidx: %i\n", printf(" %4s %-4s", "123", "4567"));
-	//printf("\nidx: %i\n", ft_printf(" %4s %-4s", "123", "4567"));
-	//printf("\n-----//TEST 11\n-------------------\n");
-	//printf("\nidx: %i\n", printf(" %-4s %-4s", "123", "4567"));
-	//printf("\nidx: %i\n", ft_printf(" %-4s %-4s", "123", "4567"));
-	//printf("\n-----//TEST 13\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%*s%*s", 1, "123", 10, "4567"));
-	//printf("\nidx: %i\n", ft_printf("%*s%*s", 1, "123", 10, "4567"));
-	//printf("\n-----//TEST 16\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%*.s%.1s", 10, "123", "4567"));
-	//printf("\nidx: %i\n", ft_printf("%*.s%.1s", 10, "123", "4567"));
-	//printf("\n-----//TEST 17\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%*.0s%.2s", 10, "123", "4567"));
-	//printf("\nidx: %i\n", ft_printf("%*.0s%.2s", 10, "123", "4567"));
-	//printf("\n-----//TEST 18\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%*.3s%.3s", 10, "123", "4567"));
-	//printf("\nidx: %i\n", ft_printf("%*.3s%.3s", 10, "123", "4567"));
-	printf("\n-----//TEST 20\n-------------------\n");
-	printf("\nidx: %i\n", printf(" %*.5s//%.5s/", 10, "123", "4567"));
-	printf("\nidx: %i\n", ft_printf(" %*.5s//%.5s/", 10, "123", "4567"));
-	//printf("\n-----//TEST 22\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%*.5s%*.5s", -10, "123", 10, "4567"));
-	//printf("\nidx: %i\n", ft_printf("%*.5s%*.5s", -10, "123", 10, "4567"));
-	//printf("\n-----//TEST 28\n-------------------\n");
-	//printf("\nidx: %i\n", printf(" %3.3s %3.3s ","123", "4567"));
-	//printf("\nidx: %i\n", ft_printf(" %3.3s %3.3s ","123", "4567"));
-	//printf("\n-----//TEST 29\n-------------------\n");
-	//printf("\nidx: %i\n", printf(" %4.3s %-4.3s ","123", "4567"));
-	//printf("\nidx: %i\n", ft_printf(" %4.3s %-4.3s ","123", "4567"));
-	//printf("\n-----//TEST 32\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%.1s", ""));
-	//printf("\nidx: %i\n", ft_printf("%.1s", ""));
-	//printf("\n-----//TEST 33\n-------------------\n");
-	//printf("\nidx: %i\n", printf("%4.2s%-4.2s","123", "4567"));
-	//printf("\nidx: %i\n", ft_printf("%4.2s%-4.2s","123", "4567"));
 }
 /*/
