@@ -1,4 +1,3 @@
-printfTester
 ft_printf.h.gch
 ft_printf.o
 libftprintf.a
@@ -7,5 +6,4 @@ strings.o
 a.out
 
 .vscode/settings.json
-printfTester
 ft_printf.c

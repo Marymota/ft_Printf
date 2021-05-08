@@ -162,15 +162,14 @@ int print_precision (char *arg, t_flags *flag)
 		if (precision < width)
 		{
 			size = width - len;
-			idx = pft_print_prec(arg, flag, size);
 		}
 		else if (precision >= width)
 		{
 			size = precision - len;
-			idx = pft_print_prec(arg, flag, size);
 		}
 		else if (precision == 0)
 			align(width);
+		idx = pft_print_prec(arg, flag, size);
 	}
 	return (idx);
 }
