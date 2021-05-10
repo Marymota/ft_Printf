@@ -7,3 +7,6 @@ a.out
 printfTester
 .vscode/settings.json
 ft_printf.c
+main
+main.c
+main.o

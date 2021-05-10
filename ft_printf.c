@@ -168,6 +168,69 @@ int parse_precision (char *arg, t_flags *flag)
 	return (idx);
 }
 
+/* Counts digits/chars of hexadecimal values	*/
+int count_hex(unsigned long n)
+{
+	int idx;
+
+	idx = 0;
+	while (n > 0)
+	{
+		n = n / 16;
+		++idx;
+	}	
+	return (idx);
+}
+
+/* Counts digits of numeric values	*/
+int int_size(int i)
+{
+	int	idx;
+
+	idx = 0;
+	if (i == 0)
+		return 1; //If it returns 0 it can't advance when the digit is '0'
+	if (!(i / 10))
+		return 1;
+	else
+		++idx;
+	++idx;
+	return (idx);
+}
+
+int ft_putaddr(unsigned long n, int idx)
+{
+
+	idx = count_hex(n);
+	if (n > 15)
+	{
+		ft_putaddr((n / 16), idx);
+		ft_putaddr((n % 16), idx);
+	}
+	else if (n < 10)
+	{
+		ft_putchr(n + '0');
+	}
+	else 
+	{
+		if (n == 10)
+			ft_putchr('a');
+		else if (n == 11)
+			ft_putchr('b');
+		else if (n == 12)
+			ft_putchr('c');
+		else if (n == 13)
+			ft_putchr('d');
+		else if (n == 14)
+			ft_putchr('e');
+		else if (n == 15)
+			ft_putchr('f');
+	}
+	//printf("\ntest: %li\n", aux);
+	return (idx);
+}
+
+
 //	PRINTS / PRINT_SPECIFIERS
 
 /*	Prints and aligns one character	*/
@@ -203,21 +266,24 @@ int printf_s (va_list args, t_flags *flag, int idx)
 	return (idx);
 }
 
-/* Counts digits of numeric values	*/
-int int_size(int i)
+/*	Processes the printing pointer addresses	*/
+int printf_p (va_list args, int idx)
 {
-	int	idx;
-
-	idx = 0;
-	if (i == 0)
-		return 1; //If it returns 0 it can't advance when the digit is '0'
-	if (!(i / 10))
-		return 1;
-	else
-		++idx;
-	++idx;
-	return (idx);
+	void	*arg;
+	ssize_t	address;
+		
+	arg = va_arg(args, void*);
+	address = (ssize_t)(arg);
+	//if (flag->width > 0 && flag->left_align == 0)
+	//	idx += parse_width(arg, flag);
+	write (1, "0x", 2);
+	idx = ft_putaddr(address, idx);
+	return (idx + 2);
 }
+//!!! Parse width has to measure string length
+// because an address is not a string
+// we have to measure it some other way
+
 
 
 //	CHECKS
@@ -250,24 +316,7 @@ int count_width(const char *format, va_list args, t_flags *flag)
 	return (ret);
 }
 
-/* Finds the specifier and sends it to be print	*/
-int get_specifier(const char *format, va_list args, t_flags *flag)
-{
-	int	idx;
-	
-	idx = 0;
-	if (*format == 'c')
-		idx = printf_c(args, flag, idx);
-	else if (*format == 's')
-	{
-		idx = printf_s(args, flag, idx);
-	}
-	if (flag->width > idx)
-	{
-		return(flag->width);
-	}
-	return (idx);
-}
+
 
 
 /*	Defines the value for precision and width if the asterisk flag is used  */
@@ -287,22 +336,7 @@ void parse_asterisk(const char *format, va_list args, t_flags *flag)
 	}
 }
 
-/* Find and update flags value 	*/
-int get_flags(const char *format, va_list args, t_flags *flag)
-{
-	if (*format == '-')
-		flag->left_align = 1;
-	else if (*format == '*')
-	{
-		flag->asterisk = 1;
-		parse_asterisk(format, args, flag);
-	}
-	else if (*format == '.')
-		flag->precision = 0;
-	else	
-		return (0);
-	return (1);
-}
+
 
 /* Advances format after counting width and/or precision	*/
 int count_digits(const char *format, va_list args, t_flags *flag)
@@ -321,6 +355,42 @@ int count_digits(const char *format, va_list args, t_flags *flag)
 		fmt = int_size(flag->width);
 	}
 	return (fmt);
+}
+
+/* Finds the specifier and sends it to be print	*/
+int get_specifier(const char *format, va_list args, t_flags *flag)
+{
+	int	idx;
+	
+	idx = 0;
+	if (*format == 'c')
+		idx = printf_c(args, flag, idx);
+	else if (*format == 's')
+		idx = printf_s(args, flag, idx);
+	else if (*format == 'p')
+		idx = printf_p(args, idx);
+	if (flag->width > idx)
+	{
+		return(flag->width);
+	}
+	return (idx);
+}
+
+/* Find and update flags value 	*/
+int get_flags(const char *format, va_list args, t_flags *flag)
+{
+	if (*format == '-')
+		flag->left_align = 1;
+	else if (*format == '*')
+	{
+		flag->asterisk = 1;
+		parse_asterisk(format, args, flag);
+	}
+	else if (*format == '.')
+		flag->precision = 0;
+	else	
+		return (0);
+	return (1);
 }
 
 /*	Parse the format string to find flags width, precision & specifier	*/
@@ -369,6 +439,23 @@ int ft_printf(const char *format, ...)
 /*/
 int main (void)
 {
+	int G = -1;
+	//static int s;
+	//int a;
+	//int *p;
+//
+	//p = malloc(sizeof(int));
 
-}
-/*/
+	//printf("\n-----//TEST 1\n-------------------\n");
+	printf("  idx: %i\n\n", printf("%p", (void *) &G));
+	printf("  idx: %i\n\n", ft_printf("%p", (void *) &G));
+	//printf("idx: %i\n\n", printf("&s    = %p\n", (void *) &s));
+	//printf("idx: %i\n\n", ft_printf("&s    = %p\n", (void *) &s));
+	//printf("idx: %i\n\n", printf("&a    = %p\n", (void *) &a));
+	//printf("idx: %i\n\n", ft_printf("&a    = %p\n", (void *) &a));
+	//printf("idx: %i\n\n", printf("&p    = %p\n", (void *) &p));
+	//printf("idx: %i\n\n", ft_printf("&p    = %p\n", (void *) &p));
+	//printf("idx: %i\n\n", printf("p    = %p\n", (void *) p));
+	//printf("idx: %i\n\n", ft_printf("p    = %p\n", (void *) p));
+
+}/*/
