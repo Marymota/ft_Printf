@@ -21,12 +21,55 @@ int ft_putchr(char c)
 {
 	return (write(1, &c, 1));
 }
+/*	Prints a number	*/
+void	ft_putnbr(int n)
+{
+	if (n == -2147483648)
+	{
+		ft_putchr('-');
+		ft_putchr('2');
+		ft_putnbr(147483648);
+	}
+	else if (n < 0)
+	{
+		ft_putchr('-');
+		ft_putnbr(n * -1);
+	}
+	else if (n / 10)
+	{
+		ft_putnbr(n / 10);
+		ft_putchr(n % 10 + '0');
+	}
+	else
+		ft_putchr(n + '0');
+}
 /*	Prints spaces to align content based on width, precision & alignement	*/
-void align(int len)
+void	align(int len)
 {
 	while (len--)
 		ft_putchr(' ');
 }
+/*	Checks is a character is a digit*/
+int is_digit(const char *format)
+{
+	return (*format >= 48 && *format <= 57);
+}
+/*	Counts digits of numeric values*/
+int int_size(int i)
+{
+	int idx;
+
+	idx = 0;
+	if (i == 0)
+		return 1;
+	if (!(i / 10))
+		return 1;
+	else
+		++idx;
+	++idx;
+	return (idx);
+}
+
 /*	Counts digits/chars of hexadecimal values	*/
 int count_hex(unsigned long n)
 {
@@ -39,6 +82,45 @@ int count_hex(unsigned long n)
 		++idx;
 	}	
 	return (idx);
+}
+/*	Returns a number from a combination of digit characters	*/
+int count_width(const char *format, va_list args, t_flags *flag)
+{
+	int ret;
+
+	ret = 0;
+	if (flag->asterisk == 1)
+	{
+		flag->asterisk = va_arg(args, int);
+		return (flag->asterisk);
+	}
+	if (is_digit(format))
+	{
+		while (is_digit(format))
+		{
+			ret = ret * 10 + (*format - '0');
+			++format;
+		}
+	}
+	return (ret);
+}
+/*	Advances format after counting width and/or precision	*/
+int count_digits(const char *format, va_list args, t_flags *flag)
+{
+	int fmt;
+
+	fmt = 0;
+	if (flag->precision >= 0) // If default value is negative don't forget to compare...
+	{
+		flag->precision = count_width(format, args, flag);
+		fmt =int_size(flag->precision);
+	}
+	else 
+	{
+		flag->width = count_width(format, args, flag);
+		fmt = int_size(flag->width);
+	}
+	return (fmt);
 }
 /*	Measures the length of a string	*/
 int ft_strlen(const char *str)
@@ -274,69 +356,38 @@ int printf_p (va_list args, t_flags *flag, int idx)
 		idx += parse_hexadecimal(address, flag);
 	return (idx + 2);
 }
+/*	Processes the printing of digits	*/
+/*int printf_d (va_list args, t_flags *flag, int idx)
+{
+	void	*arg;
+	ssize_t	number;
+		
+	arg = va_arg(args, void *);
+	number = (ssize_t)(arg);
+
+	if (number != 0)
+	{
+		if (flag->width > 0 && flag->left_align == 0)
+		idx += parse_width(number, flag);
+		idx += ft_putnbr(number);
+	}
+	else
+	{
+		flag->width -= 3;
+		if (flag->width > 0 && flag->left_align == 0)
+			idx += parse_width(number, flag) + 6;
+		idx += ft_putnbr(number);
+	}
+	if (flag->width > 0 && flag->left_align == 1)
+		idx += parse_width(number, flag);
+	return (idx + 2);
+}
+*/
 
 
 //	*** PARSING FORMAT ***
-/* Counts digits of numeric values	*/
-int int_size(int i)
-{
-	int	idx;
-
-	idx = 0;
-	if (i == 0)
-		return 1; //If it returns 0 it can't advance when the digit is '0'
-	if (!(i / 10))
-		return 1;
-	else
-		++idx;
-	++idx;
-	return (idx);
-}
-/*	Checks is a character is a digit*/
-int is_digit(const char *format)
-{
-	return (*format >= 48 && *format <= 57);
-}
-/*	Returns a number from a combination of digit characters	*/
-int count_width(const char *format, va_list args, t_flags *flag)
-{
-	int ret;
-
-	ret = 0;
-	if (flag->asterisk == 1)
-	{
-		flag->asterisk = va_arg(args, int);
-		return (flag->asterisk);
-	}
-	if (is_digit(format))
-	{
-		while (is_digit(format))
-		{
-			ret = ret * 10 + (*format - '0');
-			++format;
-		}
-	}
-	return (ret);
-}
-/*	Advances format after counting width and/or precision	*/
-int count_digits(const char *format, va_list args, t_flags *flag)
-{
-	int fmt;
-
-	fmt = 0;
-	if (flag->precision >= 0) // If default value is negative don't forget to compare...
-	{
-		flag->precision = count_width(format, args, flag);
-		fmt =  int_size(flag->precision);
-	}
-	else 
-	{
-		flag->width = count_width(format, args, flag);
-		fmt = int_size(flag->width);
-	}
-	return (fmt);
-}
 /*	Finds the specifier and sends it to be print	*/
+
 int get_specifier(const char *format, va_list args, t_flags *flag)
 {
 	int	idx;
