@@ -13,6 +13,7 @@ typedef struct 	flags
 	int 	asterisk; 
 	int 	width;
 	int 	precision; 
+	int 	zero;
 }				t_flags;
 
 int ft_printf(const char *format, ...);
