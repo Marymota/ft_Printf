@@ -505,6 +505,7 @@ int printf_s (va_list args, t_flags *flag, int idx)
 			parse_width_string(arg, flag);
 	}
 
+
 	if (flag->width == 0)
 	{
 		if (flag->precision == -1)
@@ -514,15 +515,21 @@ int printf_s (va_list args, t_flags *flag, int idx)
 			else if (*arg > 0)
 				idx = len;
 		}
+		else if (flag->precision < len)
+			idx = flag->precision;
+		else 
+			idx = len;
 	}
 	else if (flag->width > 0)
 	{
 		if (flag->precision >= 0)
 		{
-			if (flag->precision < len)
-				idx = flag->width + flag->precision;
-			else 
+			if (flag->precision < flag->width)
+				idx = flag->width;
+			else if (flag->precision < len)
 				idx = flag->precision;
+			else	
+				idx = len;
 		}
 		else if (flag->width >= len)
 			idx = flag->width;
