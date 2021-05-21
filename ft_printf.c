@@ -157,8 +157,9 @@ int is_digit(const char *format)
 int int_size(int i)
 {
 	int idx;
-
 	idx = 0;
+	
+	//printf("arg = %i\n", i);
 
 	if (i == -2147483648)
 		return (10);
@@ -172,7 +173,26 @@ int int_size(int i)
 	}
 	if (i >= 0)
 		++idx;
-	//printf("idx = %i\n", idx);
+	
+	return (idx);
+}
+/*	Counts digits of unsigned numeric values*/
+int uint_size(unsigned int i)
+{
+	int idx;
+	idx = 0;
+	
+	if (i < 10)
+		return (1);
+	while (i > 9)
+	{
+		i /= 10;
+		++idx;
+	}
+	if (i)
+		++idx;
+	
+
 	return (idx);
 }
 /*	Counts digits/chars of hexadecimal values	*/
@@ -786,25 +806,28 @@ int printf_u (va_list args, t_flags *flag, int idx)
 	int minus;
 
 	arg = va_arg(args, size_t);
-	
-	//printf("\narg= %li\n", arg);
+	len = uint_size(arg);
+
+	//printf("\ntest: %li\n", arg);
 
 	if (flag->left_align == 1)
 	{
 		if (arg >= 10)
-			len = int_size((size_t)arg / 10) + 1;
+			len = uint_size((size_t)arg);
 		else 
 			len = 1;
 	}
 	else if (flag->left_align == 0)
 	{
 		if (arg >= 10)
-			len = int_size((size_t)arg / 10) + 1;
+			len = uint_size((size_t)arg);
 		else if (arg < 10)
 			len = 1;
 		else
-			int_size((size_t)arg);
+			uint_size((size_t)arg);
 	}
+
+	
 		
 	idx = 0;
 	minus = 0;
@@ -835,6 +858,21 @@ int printf_u (va_list args, t_flags *flag, int idx)
 			else if (flag->precision < len)
 				align(flag->width - len);
 		}
+		else if (flag->left_align == 0)
+		{
+			if (flag->width > flag->precision)
+			{
+				if (flag->precision >= len)
+					align(flag->width - flag->precision);
+				else if (flag->precision < len)
+					align_integer(flag->width - len);
+			}
+			if (flag->precision > len)
+				align_integer(flag->precision - len);
+			ft_putunbr(arg);
+		}
+		else	
+			return (0);
 	}
 
 //	if (arg == 0)
@@ -1054,11 +1092,19 @@ int ft_printf(const char *format, ...)
 int main (void)
 {
 
-	printf("  idx: %i\n\n", printf(" *%-*.*u* *%*.*u* ", 4, 5, 10, 10, 21, -10));
-	printf("  idx: %i\n\n", ft_printf(" *%-*.*u* *%*.*u* ", 4, 5, 10, 10, 21, -10));
+	//printf("  idx: %i\n\n", printf(" *%-*.*u* *%*.*u* ", 4, 5, 10, 10, 21, -10));
+	//printf("  idx: %i\n\n", ft_printf(" *%-*.*u* *%*.*u* ", 4, 5, 10, 10, 21, -10));
+//
+	//printf("  idx: %i\n\n", printf(" *%-*.*u* *%*.*u* ", 6, 2, 102, 10, 21, -101));
+	//printf("  idx: %i\n\n", ft_printf(" *%-*.*u* *%*.*u* ", 6, 2, 102, 10, 21, -101));
+//
+	//printf("  idx: %i\n\n", printf(" *%*.*u* *%*.*u* ", -6, 2, 102, 10, 21, 101));
+	//printf("  idx: %i\n\n", ft_printf(" *%*.*u* *%*.*u* ", -6, 2, 102, 10, 21, 101));
 
-	printf("  idx: %i\n\n", printf(" %-3.2u %10.42u ", 10, -10));
-	printf("  idx: %i\n\n", ft_printf(" %-3.2u %10.42u ", 10, -10));
+	printf("  idx: %i\n\n", printf(" 0*%0-*.*u*0 0*%0*.*u*0 ", 2, 6, 102, 21, 10, -101));
+	printf("  idx: %i\n\n", ft_printf(" 0*%0-*.*u*0 0*%0*.*u*0 ", 2, 6, 102, 21, 10, -101));
 
+	printf("  idx: %i\n\n", printf(" 0*%0-*u*0 0*%0*u*0 ", 21, 1021, 21, -1011));
+	printf("  idx: %i\n\n", ft_printf(" 0*%0-*u*0 0*%0*u*0 ", 21, 1021, 21, -1011));
 }
 /*/
