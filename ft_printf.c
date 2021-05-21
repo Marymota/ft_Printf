@@ -77,12 +77,24 @@ int return_integer(t_flags *flag, int idx, int len, int minus)
 		else if (flag->width != 0)
 			idx = flag->width;
 	}
+	//printf("\nlen= %i, width= %i\n", len, flag->width);
 	if (flag->width >= flag->precision && flag->width != 0)
 	{
-		idx = flag->width;
+		if (flag->width < len)
+			idx = len;
+		else
+			idx = flag->width;
 	}
+	else if (flag->precision > flag->width)
+	{
+		if (flag->precision <= len)
+		idx = len;
+	}
+
 	else if (flag->precision == -1)
 		idx = len;
+		
+
 	return (idx);
 }
 
@@ -192,7 +204,7 @@ int uint_size(unsigned int i)
 	if (i)
 		++idx;
 	
-
+	//printf("\nidx:%i \n", idx);
 	return (idx);
 }
 /*	Counts digits/chars of hexadecimal values	*/
@@ -802,10 +814,9 @@ int printf_u (va_list args, t_flags *flag, int idx)
 {
 	size_t arg;
 	int len;
-	
 	int minus;
 
-	arg = va_arg(args, size_t);
+	arg = va_arg(args, int);
 	len = uint_size(arg);
 
 	//printf("\ntest: %li\n", arg);
@@ -852,7 +863,10 @@ int printf_u (va_list args, t_flags *flag, int idx)
 		{
 			if (flag->precision > len)
 				align_integer(flag->precision - len);
-			ft_putunbr(arg);
+			if (flag->precision == 0 && arg == 0)
+				align(len);
+			else
+				ft_putunbr(arg);
 			if (flag->precision >= len)
 				align(flag->width - flag->precision);
 			else if (flag->precision < len)
@@ -865,7 +879,13 @@ int printf_u (va_list args, t_flags *flag, int idx)
 				if (flag->precision >= len)
 					align(flag->width - flag->precision);
 				else if (flag->precision < len)
-					align_integer(flag->width - len);
+				{
+					if (flag->zero == 1)
+						align_integer(flag->width - len);
+					else 
+						align(flag->width - len);
+				}
+
 			}
 			if (flag->precision > len)
 				align_integer(flag->precision - len);
@@ -1031,7 +1051,7 @@ int get_flags(const char *format, va_list args, t_flags *flag)
 	}
 	else if (*format == '.')
 		flag->precision = 0;
-	else if (*format == '0')
+	else if (*format == '0' && flag->precision == -1)
 		flag->zero = 1;
 	else	
 		return (0);
