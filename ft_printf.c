@@ -250,7 +250,20 @@ int uint_size(unsigned int i)
 	return (idx);
 }
 /*	Counts digits/chars of hexadecimal values	*/
-int count_hex(unsigned long n)
+int count_addr(unsigned long n)
+{
+	int idx;
+
+	idx = 0;
+	while (n > 0)
+	{
+		n = n / 16;
+		++idx;
+	}	
+	return (idx);
+}
+/*	Counts digits/chars of hexadecimal values	*/
+int count_hex(unsigned int n)
 {
 	int idx;
 
@@ -332,8 +345,8 @@ int ft_putstr(char *str)
 /*	Prints the hexadecimal value referent to an address*/
 int ft_putaddr(unsigned long n, int idx)
 {
-
-	idx = count_hex(n);
+	idx = count_addr(n);
+	
 	if (n > 15)
 	{
 		ft_putaddr((n / 16), idx);
@@ -361,7 +374,38 @@ int ft_putaddr(unsigned long n, int idx)
 	//printf("\ntest: %li\n", aux);
 	return (idx);
 }
-
+/*	Prints the hexadecimal value referent to an address*/
+int ft_puthex(unsigned int n, int idx)
+{
+	idx = count_hex(n);
+	
+	if (n > 15)
+	{
+		ft_puthex((n / 16), idx);
+		ft_puthex((n % 16), idx);
+	}
+	else if (n < 10)
+	{
+		ft_putchr(n + '0');
+	}
+	else 
+	{
+		if (n == 10)
+			ft_putchr('a');
+		else if (n == 11)
+			ft_putchr('b');
+		else if (n == 12)
+			ft_putchr('c');
+		else if (n == 13)
+			ft_putchr('d');
+		else if (n == 14)
+			ft_putchr('e');
+		else if (n == 15)
+			ft_putchr('f');
+	}
+	//printf("\ntest: %li\n", aux);
+	return (idx);
+}
 
 
 //	*** PRINT_PARSE FLAGS	***
@@ -538,10 +582,14 @@ int printf_precision_unsigned(ssize_t arg, t_flags *flag, int size, int len)
 	int	idx;
 
 	idx = 0;
+
+
+
 	if (arg < 0)
 	{
 		arg = 4294967296 + arg;
 	}
+
 	if (flag->precision >= len)
 	{
 		if (flag->precision < flag->width)
@@ -551,6 +599,7 @@ int printf_precision_unsigned(ssize_t arg, t_flags *flag, int size, int len)
 		else if (flag->precision >= flag->width )
 			size = flag->precision - len;
 	}
+
 	if (flag->left_align == 0)
 	{
 		if (flag->width > flag->precision)
@@ -579,6 +628,7 @@ int printf_precision_unsigned(ssize_t arg, t_flags *flag, int size, int len)
 			align_integer(size);
 		}
 	}
+
 	if (flag->left_align == 1)
 	{
 
@@ -676,7 +726,7 @@ int parse_hexadecimal(ssize_t address, t_flags *flag)
 	int	len;
 
 	idx = 0;
-	len = count_hex(address);
+	len = count_addr(address);
 	flag->width = flag->width - len - 2;
 	if (flag->width > 0)
 	{
@@ -879,7 +929,7 @@ int printf_u (va_list args, t_flags *flag, int idx)
 				return (flag->width);
 			}
 		}
-		else if (flag->width < len && flag->precision <= 0)
+		else if (flag->width < len && flag->precision == 0)
 		{
 			if (flag->zero == 1 && flag->left_align == 0)
 			{
@@ -891,14 +941,16 @@ int printf_u (va_list args, t_flags *flag, int idx)
 				ft_putunbr(arg);
 				return (len);
 			}
-			else if (flag->left_align == 1)
-			{
-				ft_putunbr(arg);
-				return (len);
-			}
+			
+		}
+		else if (flag->width < len && flag->precision == -1)
+		{
+			ft_putunbr(arg);
+			return (len);
 		}
 	}
-	else if (arg == 0)
+
+	if (arg == 0)
 	{
 		if (flag->precision == 0)
 		{
@@ -933,6 +985,7 @@ int printf_u (va_list args, t_flags *flag, int idx)
 			}
 		}
 	}
+
 	else if (flag->precision == flag->width)
 	{
 
@@ -970,7 +1023,7 @@ int printf_u (va_list args, t_flags *flag, int idx)
 int printf_x (va_list args, t_flags *flag, int idx)
 {
 	int	arg;
-	size_t	address;
+	size_t	hex;
 	int size;
 	int len;
 		
@@ -978,39 +1031,86 @@ int printf_x (va_list args, t_flags *flag, int idx)
 	size = 0;
 	len = 0;
 	arg = va_arg(args, int);
-	address = (size_t)arg;
-	len = count_hex(address);
 
-	if (address == 0)
+	hex = (size_t)arg;
+	len = count_hex(hex);
+
+	if (hex == 0)
 	{
 		len = 1;
 		++idx;
 	}
-	//printf("\ntest: %i\n", len);
-	if ( flag->precision == 0)
-		return (0);
-
-	if (flag->precision > len)
+	
+	
+	if (flag->width != 0)
 	{
-		size = flag->precision - len;
-		idx += size;
-		align_integer(size);
-	}
-	if (flag->width > 0 && flag->left_align == 0)
-		idx += ft_putaddr(address, idx);
-	else 
-	{
-		idx += ft_putaddr(address, idx);
-		if (flag->width > 0 && flag->left_align == 1)
+		if (flag->width > flag->precision)
 		{
-			if (flag->width > flag->precision)
+			if (flag->left_align == 0)
 			{
-				size = flag->width - flag->precision;
-					align(size);
+				if (flag->precision > 0)
+					align(flag->width - flag->precision);
+				else if (flag->width > 0)
+					align_integer(flag->width - len);
 			}
 		}
 	}
-	//idx += parse_hexadecimal(address, flag);
+	if (flag->precision > len)
+	{
+		size = flag->precision - len;
+		align_integer(flag->precision - len);
+	}
+	ft_puthex(hex, idx);
+	if (flag->width > 0 && flag->left_align == 1)
+	{
+		if (flag->width > flag->precision)
+		{
+			if (flag->precision >= len)
+			{
+				size = flag->width - flag->precision;
+				align(size);
+			}
+			else if (flag->precision < len)
+				align (flag->width - len);
+		}
+	}
+
+	if (flag->width < flag->precision)
+	{
+		if (flag->precision > len)
+			idx = flag->precision ;
+		else if (flag->precision < len)
+			idx = flag->width + len ;
+	}
+	else if (flag->width > flag->precision)
+	{
+		if (flag->width > len)
+			idx = flag->width;
+		else if (flag->precision > len)
+			idx = flag->precision;
+		else if (flag->precision < len)
+			idx = flag->width;
+		else if (flag->width != 0)
+			idx = flag->width;
+	}
+	//printf("\nlen= %i, width= %i\n", len, flag->width);
+	if (flag->width >= flag->precision && flag->width != 0)
+	{
+		if (flag->width < len)
+			idx = len;
+		else
+			idx = flag->width;
+	}
+	else if (flag->precision > flag->width)
+	{
+		if (flag->precision <= len)
+		idx = len;
+	}
+
+	else if (flag->precision == -1)
+		idx = len;
+		
+
 	return (idx);
 }
 
