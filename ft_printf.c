@@ -272,7 +272,8 @@ int count_hex(unsigned int n)
 	{
 		n = n / 16;
 		++idx;
-	}	
+	}
+
 	return (idx);
 }
 /*	Returns a number from a combination of digit characters	*/
@@ -1029,7 +1030,6 @@ int printf_x (va_list args, t_flags *flag, int idx)
 		
 	idx = 0;
 	size = 0;
-	len = 0;
 	arg = va_arg(args, int);
 
 	hex = (size_t)arg;
@@ -1040,19 +1040,142 @@ int printf_x (va_list args, t_flags *flag, int idx)
 		len = 1;
 		++idx;
 	}
+
 	
+	if (flag->left_align == 1)
+	{
+		if (flag->zero == 1 && flag->precision == -1 && arg != 0)
+		{	
+			ft_puthex(hex, idx);
+			if (flag->width > len)
+			{
+				align(flag->width - len);
+				return (flag->width);
+			}
+			return (len);
+		}
+	}
+
+	if (flag->precision == 0 && flag->width == 0)
+	{
+		if (arg == 0)
+			return (0);
+		else if (arg != 0)
+		{
+			ft_puthex(hex, idx);
+			return (len);
+		}
+	}
+	else if (flag->width >= flag->precision && arg == 0)
+	{
+		if (flag->precision == -1)
+		{
+			if (flag->left_align == 0)
+			{
+				if (flag->width > 0)
+				{
+					if (flag->zero == 0)
+					{
+						align(flag->width - len);
+						ft_puthex(hex, idx);
+						return(flag->width);
+					}
+					else if (flag->zero == 1)
+					{	
+						align_integer(flag->width - len);
+						ft_puthex(hex, idx);
+						return (flag->width);
+					}
+				}
+				
+			}
+			else if(flag->left_align == 1)
+			{
+				if (flag->width > 0)
+				{
+					ft_puthex(hex, idx);
+					align(flag->width - len);
+					return(flag->width);
+				}
+				else
+				{
+					ft_puthex(hex, idx);
+					return (len);
+				}
+			}
+		}
+		else if (flag->precision > -1)
+		{
+			if (flag->left_align == 0)
+			{
+				align(flag->width - flag->precision);
+			}
+			if (flag->precision != 0)
+				align_integer(flag->precision);
+			if (flag->left_align == 1)
+			{
+				align(flag->width - flag->precision);
+			}
+			return(flag->width);
+		}
+		else if (flag->width > len)
+		{
+			align(flag->width - len);
+			ft_puthex(hex, idx);
+			return (flag->width);
+		}
+		else
+		{
+			align_integer(flag->precision);
+			align(flag->width - flag->precision);
+			return (flag->width);
+		} 
+	}
+	else if (flag->width <= flag->precision)
+	{
+		align_integer(flag->precision - len);
+		ft_puthex(hex, idx);
+		return (flag->precision);
+
+	}
+	else if (flag->width > 0 && arg == 0)
+	{
+		align(flag->width);
+		return (flag->width);
+	}
 	
 	if (flag->width != 0)
 	{
 		if (flag->width > flag->precision)
 		{
-			if (flag->left_align == 0)
+			if (flag->left_align == 0 && flag->zero == 0)
 			{
 				if (flag->precision > 0)
+				{
+					if (flag->precision > len)
+						align(flag->width - flag->precision);
+					else 
+						align(flag->width - len);
+				}
+				else if (flag->zero == 1 && flag->precision > 0)
+					align_integer(flag->width - len);
+				else 
+					align(flag->width - len);
+			}
+			else if (flag->zero == 1 && flag->left_align == 0)
+			{
+				if (flag->precision > len)
+				{ 
 					align(flag->width - flag->precision);
-				else if (flag->width > 0)
+				}
+				else if (flag->precision >= 0)
+				{
+					align (flag->width - len);
+				}
+				else
 					align_integer(flag->width - len);
 			}
+			
 		}
 	}
 	if (flag->precision > len)
