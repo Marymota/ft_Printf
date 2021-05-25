@@ -2,6 +2,8 @@ NAME = libftprintf.a
 HEADER = ft_printf.h
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
+LIBFT = libft
+LIBFT_LIB = libft.a
 AR = ar rcs
 
 SRCS = $(wildcard *.c)
@@ -9,8 +11,8 @@ OBJS = $(SRCS:.c=.o)
 
 all:		$(NAME)
 
-$(NAME):	${OBJS}
-			${AR} ${NAME} ${OBJS}
+$(NAME):	$(OBJS)
+			$(AR) $(NAME) $^
 
 bonus: 		all
 
