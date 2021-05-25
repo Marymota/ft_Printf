@@ -407,7 +407,37 @@ int ft_puthex(unsigned int n, int idx)
 	//printf("\ntest: %li\n", aux);
 	return (idx);
 }
-
+/*	Prints the hexadecimal value referent to an address*/
+int ft_putheX(unsigned int n, int idx)
+{
+	idx = count_hex(n);
+	//printf("\ntest: %i\n", idx);
+	if (n > 15)
+	{
+		ft_putheX((n / 16), idx);
+		ft_putheX((n % 16), idx);
+	}
+	else if (n < 10)
+	{
+		ft_putchr(n + '0');
+	}
+	else 
+	{
+		if (n == 10)
+			ft_putchr('A');
+		else if (n == 11)
+			ft_putchr('B');
+		else if (n == 12)
+			ft_putchr('C');
+		else if (n == 13)
+			ft_putchr('D');
+		else if (n == 14)
+			ft_putchr('E');
+		else if (n == 15)
+			ft_putchr('F');
+	}
+	return (idx);
+}
 
 //	*** PRINT_PARSE FLAGS	***
 /*	If precision is less than the length of the string, the string will be truncate */
@@ -781,6 +811,11 @@ int printf_s (va_list args, t_flags *flag, int idx)
 	int len;
 
 	arg = va_arg(args, char *);
+	if (arg == NULL)
+	{
+		ft_putstr("(null)");
+		return(6);
+	}
 	len = ft_strlen(arg);
 	if (flag->precision >= 0)
 		parse_precision_string(arg, flag);
@@ -1025,13 +1060,10 @@ int printf_x (va_list args, t_flags *flag, int idx)
 {
 	int	arg;
 	size_t	hex;
-	int size;
 	int len;
 		
 	idx = 0;
-	size = 0;
 	arg = va_arg(args, int);
-
 	hex = (size_t)arg;
 	len = count_hex(hex);
 
@@ -1041,7 +1073,6 @@ int printf_x (va_list args, t_flags *flag, int idx)
 		++idx;
 	}
 
-	
 	if (flag->left_align == 1)
 	{
 		if (flag->zero == 1 && flag->precision == -1 && arg != 0)
@@ -1060,12 +1091,8 @@ int printf_x (va_list args, t_flags *flag, int idx)
 	{
 		if (arg == 0)
 			return (0);
-		else if (arg != 0)
-		{
-			ft_puthex(hex, idx);
-			return (len);
-		}
 	}
+	
 	else if (flag->width >= flag->precision && arg == 0)
 	{
 		if (flag->precision == -1)
@@ -1087,21 +1114,6 @@ int printf_x (va_list args, t_flags *flag, int idx)
 						return (flag->width);
 					}
 				}
-				
-			}
-			else if(flag->left_align == 1)
-			{
-				if (flag->width > 0)
-				{
-					ft_puthex(hex, idx);
-					align(flag->width - len);
-					return(flag->width);
-				}
-				else
-				{
-					ft_puthex(hex, idx);
-					return (len);
-				}
 			}
 		}
 		else if (flag->precision > -1)
@@ -1122,14 +1134,7 @@ int printf_x (va_list args, t_flags *flag, int idx)
 		{
 			align(flag->width - len);
 			ft_puthex(hex, idx);
-			return (flag->width);
 		}
-		else
-		{
-			align_integer(flag->precision);
-			align(flag->width - flag->precision);
-			return (flag->width);
-		} 
 	}
 	else if (flag->width <= flag->precision)
 	{
@@ -1138,102 +1143,178 @@ int printf_x (va_list args, t_flags *flag, int idx)
 		return (flag->precision);
 
 	}
-	else if (flag->width > 0 && arg == 0)
-	{
-		align(flag->width);
-		return (flag->width);
-	}
-	
 	if (flag->width != 0)
 	{
 		if (flag->width > flag->precision)
 		{
-			if (flag->left_align == 0 && flag->zero == 0)
-			{
-				if (flag->precision > 0)
-				{
-					if (flag->precision > len)
-						align(flag->width - flag->precision);
-					else 
-						align(flag->width - len);
-				}
-				else if (flag->zero == 1 && flag->precision > 0)
-					align_integer(flag->width - len);
-				else 
-					align(flag->width - len);
-			}
-			else if (flag->zero == 1 && flag->left_align == 0)
+			if (flag->left_align == 0)
 			{
 				if (flag->precision > len)
-				{ 
 					align(flag->width - flag->precision);
-				}
 				else if (flag->precision >= 0)
-				{
 					align (flag->width - len);
-				}
-				else
+				else if (flag->zero == 1)
+				{
+				 	if (flag->precision == -1)
 					align_integer(flag->width - len);
+				}
 			}
-			
 		}
 	}
 	if (flag->precision > len)
-	{
-		size = flag->precision - len;
 		align_integer(flag->precision - len);
-	}
 	ft_puthex(hex, idx);
-	if (flag->width > 0 && flag->left_align == 1)
+	if (flag->left_align == 1)
 	{
-		if (flag->width > flag->precision)
-		{
-			if (flag->precision >= len)
-			{
-				size = flag->width - flag->precision;
-				align(size);
-			}
-			else if (flag->precision < len)
-				align (flag->width - len);
-		}
+		if (flag->precision >= len)
+			align(flag->width - flag->precision);
+		else if (flag->precision < len)
+			align (flag->width - len);
 	}
 
-	if (flag->width < flag->precision)
-	{
-		if (flag->precision > len)
-			idx = flag->precision ;
-		else if (flag->precision < len)
-			idx = flag->width + len ;
-	}
-	else if (flag->width > flag->precision)
+	if (flag->width > flag->precision)
 	{
 		if (flag->width > len)
-			idx = flag->width;
-		else if (flag->precision > len)
-			idx = flag->precision;
-		else if (flag->precision < len)
-			idx = flag->width;
-		else if (flag->width != 0)
-			idx = flag->width;
-	}
-	//printf("\nlen= %i, width= %i\n", len, flag->width);
-	if (flag->width >= flag->precision && flag->width != 0)
-	{
-		if (flag->width < len)
-			idx = len;
-		else
 			idx = flag->width;
 	}
 	else if (flag->precision > flag->width)
 	{
-		if (flag->precision <= len)
+		if (flag->precision > len)
+			idx = flag->precision;
+	}
+	else
 		idx = len;
+	return (idx);
+}
+/*	Processes the printing of hexadecimals	*/
+int printf_X (va_list args, t_flags *flag, int idx)
+{
+	int	arg;
+	size_t	hex;
+	int len;
+		
+	idx = 0;
+	arg = va_arg(args, int);
+	hex = (size_t)arg;
+	len = count_hex(hex);
+
+	if (hex == 0)
+	{
+		len = 1;
+		++idx;
 	}
 
-	else if (flag->precision == -1)
-		idx = len;
-		
+	if (flag->left_align == 1)
+	{
+		if (flag->zero == 1 && flag->precision == -1 && arg != 0)
+		{	
+			ft_putheX(hex, idx);
+			if (flag->width > len)
+			{
+				align(flag->width - len);
+				return (flag->width);
+			}
+			return (len);
+		}
+	}
 
+	if (flag->precision == 0 && flag->width == 0)
+	{
+		if (arg == 0)
+			return (0);
+	}
+	
+	else if (flag->width >= flag->precision && arg == 0)
+	{
+		if (flag->precision == -1)
+		{
+			if (flag->left_align == 0)
+			{
+				if (flag->width > 0)
+				{
+					if (flag->zero == 0)
+					{
+						align(flag->width - len);
+						ft_putheX(hex, idx);
+						return(flag->width);
+					}
+					else if (flag->zero == 1)
+					{	
+						align_integer(flag->width - len);
+						ft_putheX(hex, idx);
+						return (flag->width);
+					}
+				}
+			}
+		}
+		else if (flag->precision > -1)
+		{
+			if (flag->left_align == 0)
+			{
+				align(flag->width - flag->precision);
+			}
+			if (flag->precision != 0)
+				align_integer(flag->precision);
+			if (flag->left_align == 1)
+			{
+				align(flag->width - flag->precision);
+			}
+			return(flag->width);
+		}
+		else if (flag->width > len)
+		{
+			align(flag->width - len);
+			ft_putheX(hex, idx);
+		}
+	}
+	else if (flag->width <= flag->precision)
+	{
+		align_integer(flag->precision - len);
+		ft_putheX(hex, idx);
+		return (flag->precision);
+
+	}
+	if (flag->width != 0)
+	{
+		if (flag->width > flag->precision)
+		{
+			if (flag->left_align == 0)
+			{
+				if (flag->precision > len)
+					align(flag->width - flag->precision);
+				else if (flag->precision >= 0)
+					align (flag->width - len);
+				else if (flag->zero == 1)
+				{
+				 	if (flag->precision == -1)
+					align_integer(flag->width - len);
+				}
+			}
+		}
+	}
+	if (flag->precision > len)
+		align_integer(flag->precision - len);
+	ft_putheX(hex, idx);
+	if (flag->left_align == 1)
+	{
+		if (flag->precision >= len)
+			align(flag->width - flag->precision);
+		else if (flag->precision < len)
+			align (flag->width - len);
+	}
+
+	if (flag->width > flag->precision)
+	{
+		if (flag->width > len)
+			idx = flag->width;
+	}
+	else if (flag->precision > flag->width)
+	{
+		if (flag->precision > len)
+			idx = flag->precision;
+	}
+	else
+		idx = len;
 	return (idx);
 }
 
@@ -1257,10 +1338,10 @@ int get_specifier(const char *format, va_list args, t_flags *flag)
 		idx = printf_u(args, flag, idx);
 	else if (*format == 'x')
 		idx = printf_x(args, flag, idx);
-	//else if (*format == 'X')
-	//	idx = printf_X(args, flag, idx);
+	else if (*format == 'X')
+		idx = printf_X(args, flag, idx);
 	else if (*format == '%')
-		idx = ft_putchr('%');
+		idx += ft_putchr('%');
 	return (idx);
 }
 /*	Defines the value for precision and width if the asterisk flag is used  */
@@ -1352,19 +1433,10 @@ int ft_printf(const char *format, ...)
 int main (void)
 {
 
-	//printf("  idx: %i\n\n", printf(" *%-*.*u* *%*.*u* ", 4, 5, 10, 10, 21, -10));
-	//printf("  idx: %i\n\n", ft_printf(" *%-*.*u* *%*.*u* ", 4, 5, 10, 10, 21, -10));
-//
-	//printf("  idx: %i\n\n", printf(" *%-*.*u* *%*.*u* ", 6, 2, 102, 10, 21, -101));
-	//printf("  idx: %i\n\n", ft_printf(" *%-*.*u* *%*.*u* ", 6, 2, 102, 10, 21, -101));
-//
-	//printf("  idx: %i\n\n", printf(" *%*.*u* *%*.*u* ", -6, 2, 102, 10, 21, 101));
-	//printf("  idx: %i\n\n", ft_printf(" *%*.*u* *%*.*u* ", -6, 2, 102, 10, 21, 101));
+	printf("  idx: %i\n\n", printf("xXx%x%XxXx%%xXx%x%X", 15, 15, 16, 16));
+	printf("  idx: %i\n\n", ft_printf("xXx%x%XxXx%%xXx%x%X", 15, 15, 16, 16));	
+	printf("  idx: %i\n\n", printf("xXx%x", 15));
+	printf("  idx: %i\n\n", ft_printf("xXx%x", 15));
 
-	printf("  idx: %i\n\n", printf(" 0*%0-*.*u*0 0*%0*.*u*0 ", 2, 6, 102, 21, 10, -101));
-	printf("  idx: %i\n\n", ft_printf(" 0*%0-*.*u*0 0*%0*.*u*0 ", 2, 6, 102, 21, 10, -101));
-
-	printf("  idx: %i\n\n", printf(" 0*%0-*u*0 0*%0*u*0 ", 21, 1021, 21, -1011));
-	printf("  idx: %i\n\n", ft_printf(" 0*%0-*u*0 0*%0*u*0 ", 21, 1021, 21, -1011));
 }
 /*/
