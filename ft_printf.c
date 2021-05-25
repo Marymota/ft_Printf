@@ -273,7 +273,7 @@ int count_hex(unsigned int n)
 		n = n / 16;
 		++idx;
 	}
-
+	
 	return (idx);
 }
 /*	Returns a number from a combination of digit characters	*/
@@ -404,7 +404,7 @@ int ft_puthex(unsigned int n, int idx)
 		else if (n == 15)
 			ft_putchr('f');
 	}
-	//printf("\ntest: %li\n", aux);
+	
 	return (idx);
 }
 /*	Prints the hexadecimal value referent to an address*/
@@ -436,6 +436,7 @@ int ft_putheX(unsigned int n, int idx)
 		else if (n == 15)
 			ft_putchr('F');
 	}
+	//printf("\ntest: % i\n", idx);
 	return (idx);
 }
 
@@ -851,6 +852,8 @@ int printf_p (va_list args, t_flags *flag, int idx)
 		if (flag->width > 0 && flag->left_align == 0)
 			idx += parse_hexadecimal(address, flag) + 6;
 		write (1, "(nil)", 5);
+		if (flag->precision <= 3 && flag->width <= 3)
+			idx += 3;
 	}
 	if (flag->width > 0 && flag->left_align == 1)
 		idx += parse_hexadecimal(address, flag);
@@ -1171,8 +1174,9 @@ int printf_x (va_list args, t_flags *flag, int idx)
 		else if (flag->precision < len)
 			align (flag->width - len);
 	}
-
-	if (flag->width > flag->precision)
+	if (flag->width == 0 && flag->precision == -1)
+		idx = len;
+	else if (flag->width > flag->precision)
 	{
 		if (flag->width > len)
 			idx = flag->width;
@@ -1184,6 +1188,7 @@ int printf_x (va_list args, t_flags *flag, int idx)
 	}
 	else
 		idx = len;
+	//printf("\ntest: % i\n", idx);
 	return (idx);
 }
 /*	Processes the printing of hexadecimals	*/
@@ -1303,6 +1308,8 @@ int printf_X (va_list args, t_flags *flag, int idx)
 			align (flag->width - len);
 	}
 
+	if (flag->width == 0 && flag->precision == -1)
+		idx = len;
 	if (flag->width > flag->precision)
 	{
 		if (flag->width > len)
@@ -1341,7 +1348,7 @@ int get_specifier(const char *format, va_list args, t_flags *flag)
 	else if (*format == 'X')
 		idx = printf_X(args, flag, idx);
 	else if (*format == '%')
-		idx += ft_putchr('%');
+		idx = ft_putchr('%');
 	return (idx);
 }
 /*	Defines the value for precision and width if the asterisk flag is used  */
@@ -1433,10 +1440,11 @@ int ft_printf(const char *format, ...)
 int main (void)
 {
 
-	printf("  idx: %i\n\n", printf("xXx%x%XxXx%%xXx%x%X", 15, 15, 16, 16));
-	printf("  idx: %i\n\n", ft_printf("xXx%x%XxXx%%xXx%x%X", 15, 15, 16, 16));	
-	printf("  idx: %i\n\n", printf("xXx%x", 15));
-	printf("  idx: %i\n\n", ft_printf("xXx%x", 15));
+	//printf("  idx: %i\n\n", printf("%%*.c%c%%*.s*%ps%%*.X", '0', NULL));
+	//printf("  idx: %i\n\n", ft_printf("%%*.c%c%%*.s*%ps%%*.X", '0', NULL));	
+
+	printf("  idx: %i\n\n", printf("%p", NULL));
+	printf("  idx: %i\n\n", ft_printf("%p", NULL));	
 
 }
 /*/
