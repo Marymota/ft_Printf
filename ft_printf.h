@@ -4,6 +4,7 @@
 # include <unistd.h>
 # include <stdlib.h>
 # include <stdarg.h>
+# include <stdio.h>
 
 typedef struct 	flags
 {
@@ -33,15 +34,14 @@ void	ft_putchar_fd(char c, int fd);
 int 	ft_putstr(char *str);
 void	ft_putnbr(int n);
 void	ft_putunbr(ssize_t n);
-int 	ft_putaddr(unsigned long n, int idx);
-int 	ft_puthex(unsigned int n, int idx);
-int 	ft_putheX(unsigned int n, int idx);
+void 	ft_putaddr(unsigned long n);
+void 	ft_puthex(unsigned int n);
+void 	ft_putheX(unsigned int n);
 int 	printf_truncate(char *arg, t_flags *flag);
 int 	printf_truncate_integer(int arg, t_flags *flag);
-int 	printf_precision(char *arg, t_flags *flag, int size);
+void 	printf_precision(char *arg, t_flags *flag, int size);
 int 	printf_truncate_integer(int arg, t_flags *flag);
-int 	printf_precision(char *arg, t_flags *flag, int size);
-int 	printf_precision_integer(int arg, t_flags *flag, int size, int minus);
+void 	printf_precision_integer(int arg, t_flags *flag, int size, int minus);
 int 	printf_precision_unsigned(ssize_t arg, t_flags *flag, int size, int len);
 int 	parse_width_string (char *arg, t_flags *flag);
 int 	parse_width_integer (int arg, t_flags *flag, int size);
