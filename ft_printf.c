@@ -57,22 +57,32 @@ int	return_integer(t_flags *flag, int idx, int len, int minus)
 	return (idx);
 }
 
-int	return_unsigned(t_flags *flag, int idx, int len)
+int	return_unsigned(ssize_t arg, t_flags *flag, int len)
 {
-	idx = len;
+	int	size;
+
+	size = 0;
+	if (flag->precision > len)
+		size = flag->width - flag->precision;
+	else if (flag->width > len)
+		size = flag->width - len;
+	if (flag->precision > len || flag->width > len)
+		printf_precision_unsigned(flag, size, len);
+	ft_putunbr(arg);
+	if (flag->left_align == 1)
+		if (size > 0)
+			align(size);
 	if (flag->width >= flag->precision && flag->width > len)
-	{
 		if (flag->width > len)
-			idx = flag->width;
-	}
-	else if (flag->width < flag->precision)
+			return (flag->width);
+	if (flag->width < flag->precision)
 	{
 		if (flag->precision > len)
-			idx = flag->precision;
+			return (flag->precision);
 		else if (flag->precision < len)
-			idx = flag->width + len ;
+			return (flag->width + len);
 	}
-	return (idx);
+	return (len);
 }
 
 void	align(int len)
@@ -238,8 +248,10 @@ int	ft_isdigit(int c)
 	return (c >= '0' && c <= '9');
 }
 
-void	print_max_int(int arg, t_flags *flag, int len)
+void	print_left_align_int(int arg, t_flags *flag, int len, int minus)
 {
+	int	size;
+
 	if (flag->precision > 0 || flag->precision == -1 || flag->width > 0)
 	{
 		if (flag->width > len && flag->precision < 0 && flag->zero == 0)
@@ -252,6 +264,22 @@ void	print_max_int(int arg, t_flags *flag, int len)
 		else
 			ft_putnbr_fd(arg, 1);
 	}
+	if (flag->precision > len)
+		size = flag->width - flag->precision - minus;
+	else
+		size = flag->width - len - minus;
+	if (flag->left_align == 1 && size > 0)
+		align(size);
+}
+
+int	min(int arg)
+{
+	int	minus;
+
+	minus = 0;
+	if (arg < 0)
+		minus = 1;
+	return (minus);
 }
 
 int	int_size(int i)
@@ -398,14 +426,11 @@ void	printf_precision(char *arg, t_flags *flag, int size)
 	}
 }
 
-void	printf_precision_integer(int arg, t_flags *flag, int minus)
+void	printf_precision_integer(int arg, t_flags *flag, int minus, int len)
 {
-	int	len;
-
-	len = int_size(arg);
-	if (flag->left_align == 0)
+	if (flag->precision >= 0 || flag->zero == 1)
 	{
-		if (flag->width > flag->precision)
+		if (flag->left_align == 0 && flag->width > flag->precision)
 		{
 			if (flag->precision == 0 && flag->width > flag->precision)
 				align(flag->width - flag->precision - len - minus);
@@ -418,59 +443,154 @@ void	printf_precision_integer(int arg, t_flags *flag, int minus)
 			else
 				align_integer(flag->width - minus - len);
 		}
+		if (flag->left_align == 1 || flag->width < flag->precision)
+		{
+			if (minus == 1)
+				ft_putchar_fd('-', 1);
+			align_integer(flag->precision - len);
+		}
 	}
-	if (flag->left_align == 1 || flag->width < flag->precision)
-	{
-		if (minus == 1)
-			ft_putchar_fd('-', 1);
-		align_integer(flag->precision - len);
-	}
+	print_left_align_int(arg, flag, len, minus);
 }
 
-void	printf_precision_unsigned(ssize_t arg, t_flags *flag, int size, int len)
+void	printf_precision_unsigned(t_flags *flag, int size, int len)
 {
-	if (arg < 0)
-		arg = 4294967296 + arg;
-	if (flag->precision >= len)
-	{
-		if (flag->precision < flag->width)
-			size = flag->width - flag->precision;
-		else if (flag->precision >= flag->width)
-			size = flag->precision - len;
-	}
 	if (flag->left_align == 0)
 	{
 		if (flag->width > flag->precision)
 		{
-			if (flag->precision > len)
-				size = flag->width - flag->precision;
 			if (flag->precision == 0 && flag->width > flag->precision)
-			{
-				if (arg != 0)
-					align(size - len);
-			}
+				align(flag->width - flag->precision - len);
 			else if (flag->precision != -1)
 				align(size);
 			if (flag->width > flag->precision && flag->precision != -1)
 				align_integer(flag->precision - len);
-			else if (flag->precision != -1)
-				align_integer(size - len);
-			else if (flag->left_align)
-				align_integer(size - len);
+			else if (flag->precision != -1 || flag->left_align)
+				align_integer(flag->width - flag->precision - len);
 			else
 				align_integer(flag->width - len);
 		}
 		if (flag->width < flag->precision)
-			align_integer(size);
+			align_integer(flag->precision - len);
 	}
 	if (flag->left_align == 1)
 	{
 		if (flag->precision > len)
+			align_integer(flag->precision - len);
+	}
+}
+
+void	parse_width_integer(int arg, t_flags *flag, int minus, int len)
+{
+	if (flag->precision <= 0)
+	{
+		if (arg == 0 && flag->precision == 0)
+			align(flag->width);
+		else if (flag->left_align == 1)
 		{
-			size = flag->precision - len;
-			align_integer(size);
+			if (minus == 1)
+				ft_putchar_fd('-', 1);
+			ft_putnbr_fd(arg, 1);
+			align(flag->width - len - minus);
 		}
 	}
+	if (flag->precision == flag->width)
+	{
+		if (minus == 1)
+			ft_putchar_fd('-', 1);
+		align_integer(flag->width - len);
+		ft_putnbr_fd(arg, 1);
+	}
+}
+
+int	no_precision_integer(int arg, t_flags *flag, int minus, int len)
+{
+	if (flag->precision <= 0)
+	{
+		if (arg == 0 && flag->precision == 0)
+			align(flag->width);
+		else if (flag->left_align == 1)
+			parse_width_integer(arg, flag, minus, len);
+		if ((!arg && flag->precision == 0) || flag->left_align == 1)
+			return (1);
+	}
+	return (0);
+}
+
+int	no_precision_unsigned(int arg, t_flags *flag, int len)
+{
+	if (flag->precision < 0)
+	{
+		if (flag->left_align == 1)
+		{
+			ft_putunbr(arg);
+			align(flag->width - len);
+			return (flag->width);
+		}
+		if (flag->width == 0 && flag->zero == 0)
+		{
+			ft_putunbr(arg);
+			return (1);
+		}
+		else if (flag->zero == 0)
+		{
+			align(flag->width - len);
+			ft_putunbr(arg);
+			return (flag->width);
+		}
+	}
+	return (-1);
+}
+
+int	max_int_unsigned(int arg, t_flags *flag, int len)
+{
+	if (arg > 2147483647)
+	{
+		if (flag->width > len && flag->precision == 0)
+		{
+			if (flag->zero == 1 && flag->left_align == 0)
+			{
+				align(flag->width - len);
+				ft_putunbr(arg);
+				return (flag->width);
+			}
+		}
+		else if (flag->width < len && flag->precision == 0)
+		{
+			if (flag->zero == 0 || flag->left_align == 0)
+			{
+				ft_putunbr(arg);
+				return (len);
+			}
+		}
+	}
+	return (-1);
+}
+
+int	parse_unsigned(int arg, t_flags *flag, int len, int idx)
+{
+	idx = max_int_unsigned(arg, flag, len);
+	if (flag->width < len && flag->precision == -1)
+	{
+		ft_putunbr(arg);
+		return (len);
+	}
+	else if (flag->precision <= 0)
+	{
+		idx = no_precision_unsigned(arg, flag, len);
+		if (flag->precision == 0 && arg == 0)
+		{
+			align(flag->width);
+			return (flag->width);
+		}
+	}
+	else if (flag->precision == flag->width)
+	{
+		align_integer(flag->width - len);
+		ft_putunbr(arg);
+		return (flag->width);
+	}
+	return (idx);
 }
 
 int	parse_width_string (char *arg, t_flags *flag)
@@ -486,34 +606,6 @@ int	parse_width_string (char *arg, t_flags *flag)
 	{
 		idx = size;
 		align(size);
-	}
-	return (idx);
-}
-
-int	parse_width_integer (int arg, t_flags *flag, int size)
-{
-	int	idx;
-	int	len;
-
-	idx = 0;
-	len = int_size(arg);
-	if (flag->zero == 0)
-	{
-		idx = flag->precision;
-		align_integer(flag->precision);
-	}
-	else if (size > flag->precision)
-	{
-		if (flag->precision > 0)
-			idx = flag->precision - len;
-		else
-			idx = size;
-		align_integer(idx);
-	}
-	else
-	{
-		idx = flag->precision;
-		align_integer(flag->precision - len);
 	}
 	return (idx);
 }
@@ -634,176 +726,37 @@ int	printf_p (va_list args, t_flags *flag, int idx)
 int	printf_d (va_list args, t_flags *flag, int idx)
 {
 	int	arg;
-	int	size;
 	int	len;
 	int	minus;
 
-	size = 0;
 	arg = va_arg(args, int);
-	idx = 0;
-	minus = 0;
-	if (arg < 0)
-	{
-		minus = 1;
+	minus = min(arg);
+	if (minus)
 		arg = -arg;
-	}
 	len = int_size(arg);
-	if (flag->precision < 0)
-	{
-		if (flag->left_align == 1)
-		{
-			if (minus == 1)
-				ft_putchar_fd('-', 1);
-			ft_putnbr_fd(arg, 1);
-			align(flag->width - len - minus);
-			return (flag->width);
-		}
-	}
-	if (arg == 0)
-	{
-		if (flag->precision == 0)
-		{
-			align(flag->width);
-			return (flag->width);
-		}
-	}
+	if (no_precision_integer(arg, flag, minus, len))
+		return (flag->width);
 	if (flag->precision == flag->width)
-	{
-		if (minus == 1)
-		{
-			ft_putchar_fd('-', 1);
-		}
-		align_integer(flag->width - len);
-		ft_putnbr_fd(arg, 1);
-		if (flag->width > 0)
-			return (flag->width + minus);
-		else
-			return (len);
-	}
-	if (flag->precision > len)
-		size = flag->width - flag->precision - minus;
-	else
-		size = flag->width - len - minus;
-	if (flag->precision >= 0 || flag->zero == 1)
-	{
-		printf_precision_integer(arg, flag, minus);
-	}
-	print_max_int(arg, flag, len);
-	if (flag->left_align == 1)
-	{
-		if (size > 0)
-			align(size);
-	}
-	idx = return_integer(flag, idx, len, minus);
-	return (idx);
+		parse_width_integer(arg, flag, minus, len);
+	if (flag->width && flag->precision == flag->width)
+		return (flag->width + minus);
+	else if (flag->precision == flag->width)
+		return (len);
+	printf_precision_integer(arg, flag, minus, len);
+	return (return_integer(flag, idx, len, minus));
 }
 
 int	printf_u (va_list args, t_flags *flag, int idx)
 {
 	size_t	arg;
 	int		len;
-	int		size;
 
-	size = 0;
 	arg = va_arg(args, int);
 	len = uint_size(arg);
-	idx = 0;
-	if (arg > 2147483647)
-	{
-		if (flag->width > len && flag->precision == 0)
-		{
-			if (flag->zero == 1 && flag->left_align == 0)
-			{
-				align(flag->width - len);
-				ft_putunbr(arg);
-				return (flag->width);
-			}
-			else if (flag->zero == 0 && flag->left_align == 0)
-			{
-				align(flag->width - len);
-				ft_putunbr(arg);
-				return (flag->width);
-			}
-		}
-		else if (flag->width < len && flag->precision == 0)
-		{
-			if (flag->zero == 1 && flag->left_align == 0)
-			{
-				ft_putunbr(arg);
-				return (len);
-			}
-			else if (flag->zero == 0 && flag->left_align == 0)
-			{
-				ft_putunbr(arg);
-				return (len);
-			}
-		}
-		else if (flag->width < len && flag->precision == -1)
-		{
-			ft_putunbr(arg);
-			return (len);
-		}
-	}
-	if (arg == 0)
-	{
-		if (flag->precision == 0)
-		{
-			align(flag->width);
-			return (flag->width);
-		}
-	}
-	if (flag->precision < 0)
-	{
-		if (flag->left_align == 1)
-		{
-			ft_putunbr(arg);
-			align(flag->width - len);
-			return (flag->width);
-		}
-		else if (flag->left_align == 0)
-		{
-			if (flag->zero == 0)
-			{
-				if (flag->width == 0)
-				{
-					ft_putunbr(arg);
-					return (1);
-				}
-				else
-				{
-					align(flag->width - len);
-					ft_putunbr(arg);
-					return (flag->width);
-				}
-			}
-		}
-	}
-	else if (flag->precision == flag->width)
-	{
-		align_integer(flag->width - len);
-		ft_putunbr(arg);
-		if (flag->width > 0)
-			return (flag->width);
-		else
-			return (len);
-	}
-	else if (flag->precision > len)
-		size = flag->width - flag->precision;
-	else if (flag->width > len)
-		size = flag->width - len;
-	if (flag->precision >= 0 || flag->zero == 1)
-	{
-		if (flag->precision > len || flag->width > len)
-			printf_precision_unsigned(arg, flag, size, len);
-	}
-	ft_putunbr(arg);
-	if (flag->left_align == 1)
-	{
-		if (size > 0)
-			align(size);
-	}
-	idx = return_unsigned(flag, idx, len);
-	return (idx);
+	idx = parse_unsigned(arg, flag, len, idx);
+	if (idx >= 0)
+		return (idx);
+	return (return_unsigned(arg, flag, len));
 }
 
 int	printf_x (va_list args, t_flags *flag, int idx)
@@ -1027,7 +980,7 @@ int	printf_X (va_list args, t_flags *flag, int idx)
 					align (flag->width - len);
 				else if (flag->zero == 1)
 				{
-				 	if (flag->precision == -1)
+					if (flag->precision == -1)
 						align_integer(flag->width - len);
 				}
 			}
