@@ -10,3 +10,8 @@ ft_printf.c
 main
 main.c
 main.o
+pft/
+pft/
+pft_2019/
+42TESTERS-PRINTF
+run.sh

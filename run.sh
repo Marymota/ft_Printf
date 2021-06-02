@@ -1,2 +1,2 @@
-gcc  ft_printf.c ft_printf.h
+gcc  ft_printf.c ft_integer.c ft_string.c parse_flags.c printf_char.c printf_hex.c printf_heX.c printf_integer.c printf_string.c printf_unsigned.c specifiers_integer.c specifiers_string.c utils_count.c utils_size.c main.c ft_printf.h 
 ./a.out

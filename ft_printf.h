@@ -39,7 +39,7 @@ void	printf_precision_integer(int arg, t_flags *flag, int minus, int len);
 void	align_integer(int size);
 void	parse_width_integer(int arg, t_flags *flag, int minus, int len);
 void	print_left_align_int(int arg, t_flags *flag, int len, int minus);
-int		no_precision_integer(int arg, t_flags *flag, int minus, int len);
+int		no_precision_integer(int arg, t_flags *flag);
 int		return_integer(t_flags *flag, int idx, int len, int minus);
 int		int_size(int i);
 void	printf_precision_unsigned(t_flags *flag, int size, int len);

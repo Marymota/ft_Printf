@@ -40,14 +40,34 @@ int	printf_d (va_list args, t_flags *flag, int idx)
 	if (minus)
 		arg = -arg;
 	len = int_size(arg);
-	if (no_precision_integer(arg, flag, minus, len))
-		return (flag->width);
+	
+	if (no_precision_integer(arg, flag))
+	{
+		if (flag->width >= len && flag->left_align == 0)
+			return (flag->width);
+		else if (arg == 0 && flag->precision <= 0)
+		{
+			if ((flag->left_align == 1 && flag->width > 0) && flag->precision == 0)
+				return (1);
+			else if (flag->precision == 0 && (flag->left_align == 0 || flag->zero == 0))
+				return (0);
+			else if ((flag->zero == 1 && flag->width > 0) && flag->precision == 0)
+				return (1);
+			else if ((flag->left_align == 1 && flag->zero == 1) && (flag->width == 0 && flag->precision == 0))
+				return (0);
+		}
+	}
 	if (flag->precision == flag->width)
 		parse_width_integer(arg, flag, minus, len);
 	if (flag->width && flag->precision == flag->width)
-		return (flag->width + minus);
+	{
+		if (len >= flag->width)
+			return (len + minus);
+		else if (len < flag->width)
+			return (flag->width);
+	}
 	else if (flag->precision == flag->width)
-		return (len);
+		return (len + minus);
 	printf_precision_integer(arg, flag, minus, len);
 	return (return_integer(flag, idx, len, minus));
 }
