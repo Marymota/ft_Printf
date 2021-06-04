@@ -40,7 +40,31 @@ int	printf_d (va_list args, t_flags *flag, int idx)
 	if (minus)
 		arg = -arg;
 	len = int_size(arg);
-	
+
+	if ((flag->width > len + minus) && (flag->left_align == 0))
+	{
+		if ((flag->width > len + minus && flag->width > flag->precision))
+		{
+			if (arg != 0 && flag->precision == 0)
+				align (flag->width - (len + minus));
+			else if (flag->precision > len + minus)
+				align (flag->width - (flag->precision + minus));
+			else if (flag->width >= len && flag->precision > 0)
+			{
+				if (flag->zero == 1 && flag->precision <= len)
+					align (flag->width - (len + minus));
+				else if (flag->width - flag->precision + minus > len)
+				{
+					if (flag->precision < len + minus)
+						align (flag->width - (len + minus));
+					else if (flag->precision >= len + minus)
+						align (flag->width - (flag->precision  + minus));
+				}
+			}
+		}
+
+	}
+
 	if (no_precision_integer(arg, flag))
 	{
 		if (flag->width >= len && flag->left_align == 0)
@@ -48,12 +72,10 @@ int	printf_d (va_list args, t_flags *flag, int idx)
 		else if (arg == 0 && flag->precision <= 0)
 		{
 			if ((flag->left_align == 1 && flag->width > 0) && flag->precision == 0)
-				return (1);
+				return (flag->width);
 			else if (flag->precision == 0 && (flag->left_align == 0 || flag->zero == 0))
 				return (0);
-			else if ((flag->zero == 1 && flag->width > 0) && flag->precision == 0)
-				return (1);
-			else if ((flag->left_align == 1 && flag->zero == 1) && (flag->width == 0 && flag->precision == 0))
+			else if ((flag->left_align == 1 || flag->zero == 1) && (flag->width == 0 && flag->precision == 0))
 				return (0);
 		}
 	}
@@ -64,7 +86,7 @@ int	printf_d (va_list args, t_flags *flag, int idx)
 		if (len >= flag->width)
 			return (len + minus);
 		else if (len < flag->width)
-			return (flag->width);
+			return (flag->width + minus);
 	}
 	else if (flag->precision == flag->width)
 		return (len + minus);
