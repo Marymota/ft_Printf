@@ -1,5 +1,5 @@
 #include "ft_printf.h"
-
+ 
 int	no_precision_integer(int arg, t_flags *flag)
 {
 	if (flag->precision <= 0 && arg == 0)

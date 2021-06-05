@@ -60,6 +60,18 @@ int	printf_d (va_list args, t_flags *flag, int idx)
 					else if (flag->precision >= len + minus)
 						align (flag->width - (flag->precision  + minus));
 				}
+				else if (flag->width > flag->precision)
+				{
+					if (flag->width - flag->precision > 0 && flag->precision == len)
+					{
+						align(flag->width - len);
+					}
+					else if (flag->precision < len + minus)
+					{
+						align(flag->width - len);
+					}
+				}
+
 			}
 		}
 
