@@ -1,7 +1,7 @@
 #include "ft_printf.h"
 
 int	parse_precision_string (char *arg, t_flags *flag)
-{
+{ 
 	int	idx;
 	int	len;
 	int	size;
@@ -11,14 +11,12 @@ int	parse_precision_string (char *arg, t_flags *flag)
 	size = 0;
 	if (flag->precision < len)
 		idx = printf_truncate(arg, flag);
-	else if (flag->precision >= len && flag->left_align == 1)
+	else if (flag->precision >= len)
 	{
-		if (flag->precision < flag->width)
-			size = flag->width - len;
-		else if (flag->precision >= flag->width && flag->width > len)
-			size = flag->precision - len;
-		else if (flag->precision == 0)
+		if (flag->precision == 0)
 			align(flag->width);
+		else
+			size = flag->width -len;
 		printf_precision(arg, flag, size);
 	}
 	return (idx);

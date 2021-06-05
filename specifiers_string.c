@@ -20,7 +20,7 @@ int	printf_c (va_list args, t_flags *flag, int idx)
 
 int	printf_s (va_list args, t_flags *flag, int idx)
 {
-	char	*arg;
+	char	*arg; 
 	int		len;
 
 	arg = va_arg(args, char *);
