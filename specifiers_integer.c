@@ -71,10 +71,8 @@ int	printf_d (va_list args, t_flags *flag, int idx)
 						align(flag->width - len);
 					}
 				}
-
 			}
 		}
-
 	}
 
 	if (no_precision_integer(arg, flag))
@@ -128,9 +126,26 @@ int	printf_x (va_list args, t_flags *flag, int idx)
 	arg = va_arg(args, int);
 	hex = (size_t)arg;
 	len = count_hex(hex);
-	if (hex == 0)
-		len = 1;
-	if (flag->left_align == 1 && flag->precision == -1 && arg != 0)
+	if (hex == 0 && flag->precision == 0)
+		return (0);
+	if (flag->left_align == 0 && flag->precision == -1)
+	{
+		if (flag->width > len)
+		{
+			if (flag->zero == 1)
+				align_integer(flag->width - len);
+			else
+				align(flag->width - len);
+			ft_puthex(hex);
+			return (flag->width);
+		}
+		else 
+		{
+			ft_puthex(hex);
+			return (len);
+		}
+	}
+	else if (flag->left_align == 1 && flag->precision == -1)
 	{
 		ft_puthex(hex);
 		if (flag->width > len)
@@ -138,11 +153,12 @@ int	printf_x (va_list args, t_flags *flag, int idx)
 			align(flag->width - len);
 			return (flag->width);
 		}
-		return (len);
+		else 
+		{
+			return (len);
+		}
 	}
 	idx = parse_precision_hex(arg, flag, len, hex);
-	if (idx >= 0)
-		return (idx);
 	return (return_x(flag, idx, len));
 }
 
@@ -155,9 +171,26 @@ int	printf_X (va_list args, t_flags *flag, int idx)
 	arg = va_arg(args, int);
 	hex = (size_t)arg;
 	len = count_hex(hex);
-	if (hex == 0)
-		len = 1;
-	if (flag->left_align == 1 && flag->precision == -1 && arg != 0)
+	if (hex == 0 && flag->precision == 0)
+		return (0);
+	if (flag->left_align == 0 && flag->precision == -1)
+	{
+		if (flag->width > len)
+		{
+			if (flag->zero == 1)
+				align_integer(flag->width - len);
+			else
+				align(flag->width - len);
+			ft_putheX(hex);
+			return (flag->width);
+		}
+		else 
+		{
+			ft_putheX(hex);
+			return (len);
+		}
+	}
+	else if (flag->left_align == 1 && flag->precision == -1)
 	{
 		ft_putheX(hex);
 		if (flag->width > len)
@@ -165,10 +198,9 @@ int	printf_X (va_list args, t_flags *flag, int idx)
 			align(flag->width - len);
 			return (flag->width);
 		}
-		return (len);
+		else 
+			return (len);
 	}
 	idx = parse_precision_heX(arg, flag, len, hex);
-	if (idx >= 0)
-		return (idx);
 	return (return_x(flag, idx, len));
 }

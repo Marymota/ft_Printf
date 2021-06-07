@@ -18,6 +18,8 @@ int	count_hex(unsigned int n)
 	int	idx;
 
 	idx = 0;
+	if (n == 0)
+		return (1);
 	while (n > 0)
 	{
 		n = n / 16;
