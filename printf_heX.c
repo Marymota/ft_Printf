@@ -52,54 +52,67 @@ void	ft_putheX(unsigned int n)
 	}
 }
 
-int	zero_arg_heX(int arg, t_flags *flag, int len, int hex)
-{
-	if (flag->precision == -1)
-	{
-		if (flag->left_align == 0 && flag->width > 0 && flag->precision == -1)
-		{
-			if (flag->zero == 0 && flag->precision == -1)
-				align(flag->width - len);
-			else if (flag->zero == 1)
-				align_integer(flag->width - len);
-			ft_putheX(hex);
-			return (flag->width);
-		}
-	}
-	else if (flag->precision > -1 && flag->width >= flag->precision && arg == 0)
-	{
-		if (flag->left_align == 0)
-			align(flag->width - flag->precision);
-		if (flag->precision != 0)
-			align_integer(flag->precision);
-		if (flag->left_align == 1)
-			align(flag->width - flag->precision);
-		return (flag->width);
-	}
-	return (-1);
-}
-
 int	parse_precision_heX(int arg, t_flags *flag, int len, int hex)
 {
 	int	idx;
+ 
+	idx = len;
+	arg = hex;
 
-	if (flag->precision == 0 && flag->width == 0)
+	if (flag->left_align == 1)
 	{
-		if (arg == 0)
-			return (0);
+		if (flag->precision >= len)
+		{
+			align_integer(flag->precision - len);
+		}
+		ft_putheX(arg);
+		if (flag->precision >= 0 && flag->width > flag->precision)
+		{
+			if (flag->precision > len)
+			{
+				if (flag->width - flag->precision > 0)
+					align(flag->width - flag->precision);
+			}
+			else if (flag->precision <= len)
+			{
+			 	if (flag->width - len > 0)
+					align(flag->width - len);
+			}
+		}
+		return (flag->precision);
 	}
-	else if (flag->width >= flag->precision && arg == 0)
+	else if (flag->width >= flag->precision)
 	{
-		idx = zero_arg_heX(arg, flag, len, hex);
-		if (idx >= 0)
-			return (idx);
+		if (flag->width > len)
+		{
+			if (flag->precision > len)
+			{
+				align (flag->width - flag->precision);
+				align_integer(flag->precision - len);
+			}
+			else 
+			{
+				align (flag->width - len);
+			}
+			ft_putheX(arg);
+			return (flag->width);
+		}
+		ft_putheX(arg);
+		return (len);
 	}
-	else if (flag->width <= flag->precision)
+	else if (flag->width < flag->precision)
 	{
-		align_integer(flag->precision - len);
+		if (flag->precision > len)
+			align_integer(flag->precision - len);
 		ft_putheX(hex);
 		return (flag->precision);
 	}
-	align_heX(flag, len, hex);
+	else if (flag->precision < len && flag->width >= 0)
+	{
+		ft_putheX(arg);
+		return (idx);
+	}
+	else 
+		align_heX(flag, len, hex);
 	return (-1);
 }

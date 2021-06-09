@@ -111,8 +111,19 @@ int	printf_u (va_list args, t_flags *flag, int idx)
 
 	arg = va_arg(args, int);
 	len = uint_size(arg);
-	idx = parse_unsigned(arg, flag, len, idx);
-	if (idx >= 0)
+	if (arg == 0 && flag->precision == 0)
+	{
+		if (flag->width > 0)
+		{
+			align (flag->width);
+			return (flag->width);
+		}
+		if (len == 1)
+			return (flag->width);
+		else 
+			return (flag->width);
+	}
+	if (idx > 50)
 		return (idx);
 	return (return_unsigned(arg, flag, len));
 }
@@ -127,8 +138,12 @@ int	printf_x (va_list args, t_flags *flag, int idx)
 	hex = (size_t)arg;
 	len = count_hex(hex);
 	if (hex == 0 && flag->precision == 0)
-		return (0);
-	if (flag->left_align == 0 && flag->precision == -1)
+	{
+		if (flag->width)
+			align (flag->width);
+		return (flag->width);
+	}
+	else if (flag->left_align == 0 && flag->precision == -1)
 	{
 		if (flag->width > len)
 		{
@@ -154,9 +169,7 @@ int	printf_x (va_list args, t_flags *flag, int idx)
 			return (flag->width);
 		}
 		else 
-		{
 			return (len);
-		}
 	}
 	idx = parse_precision_hex(arg, flag, len, hex);
 	return (return_x(flag, idx, len));
@@ -172,8 +185,12 @@ int	printf_X (va_list args, t_flags *flag, int idx)
 	hex = (size_t)arg;
 	len = count_hex(hex);
 	if (hex == 0 && flag->precision == 0)
-		return (0);
-	if (flag->left_align == 0 && flag->precision == -1)
+	{
+		if (flag->width)
+			align (flag->width);
+		return (flag->width);
+	}
+	else if (flag->left_align == 0 && flag->precision == -1)
 	{
 		if (flag->width > len)
 		{

@@ -5,6 +5,89 @@ int	return_unsigned(ssize_t arg, t_flags *flag, int len)
 	int	size;
 
 	size = 0;
+	if (flag->width < len && flag->precision == -1)
+	{
+		ft_putunbr(arg);
+		return (len);
+	}
+	else if (flag->width > flag->precision)
+	{
+		if (flag->precision  == -1)
+		{
+			if (flag->zero == 1)
+			{
+				if (flag->width && flag->left_align == 0)
+				{
+					align_integer(flag->width - len);
+					ft_putunbr(arg);
+					return (flag->width);
+				}
+				else 
+				{
+					ft_putunbr(arg);
+					align(flag->width - len);
+					return (flag->width);
+				}
+			}
+			else if (flag->width > len && flag->left_align == 0)
+			{
+				align(flag->width - len);
+				ft_putunbr(arg);
+				return (flag->width);
+			}
+			else if (flag->width > len && flag->left_align == 1)
+			{
+				ft_putunbr(arg);
+				align(flag->width - len);
+				return (flag->width);
+			}
+
+			else 
+			ft_putunbr(arg);
+			return (len);
+		}
+		else if (flag->precision >= len && flag->left_align == 0)
+		{
+			align (flag->width - flag->precision);
+			align_integer(flag->precision - len);
+			ft_putunbr(arg);
+			if (flag->width > flag->precision)
+				return (flag->width);
+			else 
+				return (flag->precision);
+		}
+		else if (flag->precision >= len && flag->left_align == 1)
+		{
+			align_integer(flag->precision - len);
+			ft_putunbr(arg);
+			align (flag->width - flag->precision);
+			if (flag->width > flag->precision)
+				return (flag->width);
+			else 
+				return (flag->precision);
+		}
+	}
+	else if (len >= flag->precision && len >= flag->width)
+	{
+		ft_putunbr(arg);
+		return (len);
+	}
+	else if (flag->precision < len)
+	{
+		if (flag->width > flag->precision)
+		{
+			align (flag->width - len);
+			ft_putunbr(arg);
+		}
+		return (flag->width);
+	}
+	else if (flag->precision > len)
+	{
+		align_integer(flag->precision - len);
+		ft_putunbr(arg);
+		return (flag->precision);
+	}
+
 	if (flag->precision > len)
 		size = flag->width - flag->precision;
 	else if (flag->width > len)
@@ -15,9 +98,10 @@ int	return_unsigned(ssize_t arg, t_flags *flag, int len)
 	if (flag->left_align == 1)
 		if (size > 0)
 			align(size);
-	if (flag->width >= flag->precision && flag->width > len)
-		if (flag->width > len)
-			return (flag->width);
+	if (len >= flag->precision && len >= flag->width)
+		return (len);
+	else if (flag->width >= flag->precision && flag->width > len)
+		return (flag->width);
 	if (flag->width < flag->precision)
 	{
 		if (flag->precision > len)
@@ -37,7 +121,14 @@ void	printf_precision_unsigned(t_flags *flag, int size, int len)
 			if (flag->precision == 0 && flag->width > flag->precision)
 				align(flag->width - flag->precision - len);
 			else if (flag->precision != -1)
-				align(size);
+			{
+				if (flag->width > len)
+				{
+					size = flag->width - len;
+					align(size);
+				}
+
+			}
 			if (flag->width > flag->precision && flag->precision != -1)
 				align_integer(flag->precision - len);
 			else if (flag->precision != -1 || flag->left_align)
@@ -82,51 +173,29 @@ int	no_precision_unsigned(int arg, t_flags *flag, int len)
 
 int	max_int_unsigned(int arg, t_flags *flag, int len)
 {
-	if (arg > 2147483647)
+
+	if (flag->width > len && flag->precision == 0)
 	{
-		if (flag->width > len && flag->precision == 0)
+		if (flag->zero == 1 && flag->left_align == 0)
 		{
-			if (flag->zero == 1 && flag->left_align == 0)
-			{
-				align(flag->width - len);
-				ft_putunbr(arg);
-				return (flag->width);
-			}
+			align(flag->width - len);
+			ft_putunbr(arg);
+			return (flag->width);
 		}
-		else if (flag->width < len && flag->precision == 0)
+	}
+	else if (flag->width < len && flag->precision == 0)
+	{
+		if (flag->zero == 0 || flag->left_align == 0)
 		{
-			if (flag->zero == 0 || flag->left_align == 0)
-			{
-				ft_putunbr(arg);
-				return (len);
-			}
+			ft_putunbr(arg);
+			return (len);
 		}
+	}
+	else if (flag->width < len && flag->precision < len)
+	{
+			ft_putunbr(arg);
+			return (len);
 	}
 	return (-1);
 }
 
-int	parse_unsigned(int arg, t_flags *flag, int len, int idx)
-{
-	idx = max_int_unsigned(arg, flag, len);
-	if (flag->width < len && flag->precision == -1)
-	{
-		ft_putunbr(arg);
-		return (len);
-	}
-	else if (flag->precision <= 0)
-	{
-		idx = no_precision_unsigned(arg, flag, len);
-		if (flag->precision == 0 && arg == 0)
-		{
-			align(flag->width);
-			return (flag->width);
-		}
-	}
-	else if (flag->precision == flag->width)
-	{
-		align_integer(flag->width - len);
-		ft_putunbr(arg);
-		return (flag->width);
-	}
-	return (idx);
-}
