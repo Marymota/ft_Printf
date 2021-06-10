@@ -9,24 +9,30 @@ int	printf_p (va_list args, t_flags *flag, int idx)
 	address = (ssize_t)(arg);
 	if (address != 0)
 	{
-		if (flag->width > 0 && flag->left_align == 0)
-			idx += parse_hexadecimal(address, flag);
+		if (flag->width == 0 && flag->precision == -1)
+		{
+			idx = parse_hexadecimal(address, flag);
+		}
+		else if (flag->width > 0 && flag->left_align == 0)
+			idx = parse_hexadecimal(address, flag);
 		write (1, "0x", 2);
 		ft_putaddr(address);
-		idx += count_addr(address);
 	}
-	else
+	else if (address == 0)
 	{
-		flag->width -= 3;
-		if (flag->width > 0 && flag->left_align == 0)
-			idx += parse_hexadecimal(address, flag) + 6;
-		write (1, "(nil)", 5);
-		if (flag->precision <= 3 && flag->width <= 3)
-			idx += 3;
+		if (flag->left_align == 1)
+			write (1, "(nil)", 5);
+		else if (flag->left_align == 0)
+		{
+			idx = parse_hexadecimal(address, flag);
+			write (1, "(nil)", 5);
+		}
 	}
 	if (flag->width > 0 && flag->left_align == 1)
-		idx += parse_hexadecimal(address, flag);
-	return (idx + 2);
+		idx = parse_hexadecimal(address, flag);
+	if (address == 0 && (flag->width == 0 && flag->precision == -1))
+		return (5);
+	return(idx);
 }
 
 int	printf_d (va_list args, t_flags *flag, int idx)

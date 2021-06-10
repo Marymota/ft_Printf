@@ -106,13 +106,26 @@ int	parse_hexadecimal(ssize_t address, t_flags *flag)
 	int	idx;
 	int	len;
 
-	idx = 0;
-	len = count_addr(address);
-	flag->width = flag->width - len - 2;
-	if (flag->width > 0)
+
+	len = count_addr(address) + 2;
+	idx = len;
+
+	if (flag->width == 0 && flag->precision == -1)
 	{
-		idx = flag->width;
-		align(flag->width);
+		idx = len;
+	}
+	else if (flag->width > (len))
+	{
+		if (address == 0)
+		{
+			idx = flag->width;
+			align(flag->width - 5);
+		}
+		else if (flag->width - len > 0)
+		{
+			idx = flag->width;
+			align(flag->width - len);
+		}
 	}
 	return (idx);
 }
