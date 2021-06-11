@@ -1,14 +1,12 @@
 #include "ft_printf.h"
 
 int	parse_precision_string (char *arg, t_flags *flag)
-{ 
+{
 	int	idx;
 	int	len;
-	int	size;
 
 	idx = 0;
 	len = ft_strlen(arg);
-	size = 0;
 	if (flag->precision < len)
 		idx = printf_truncate(arg, flag);
 	else if (flag->precision >= len)
@@ -16,11 +14,11 @@ int	parse_precision_string (char *arg, t_flags *flag)
 		if (flag->precision == 0)
 			align(flag->width);
 		else
-			size = flag->width -len;
-		printf_precision(arg, flag, size);
+			idx = flag->width - len;
+		printf_precision(arg, flag, idx);
 	}
 	return (idx);
-} 
+}
 
 int	printf_truncate(char *arg, t_flags *flag)
 {
@@ -95,7 +93,7 @@ int	return_string(t_flags *flag, int idx, int len)
 			idx = len;
 	}
 	else if (flag->width == 0)
-	{ 
+	{
 		if (flag->precision == -1)
 		{
 			if (len == -1)
@@ -109,5 +107,3 @@ int	return_string(t_flags *flag, int idx, int len)
 	}
 	return (idx);
 }
- 
-  

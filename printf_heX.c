@@ -52,67 +52,30 @@ void	ft_putheX(unsigned int n)
 	}
 }
 
-int	parse_precision_heX(int arg, t_flags *flag, int len, int hex)
+void	parse_precision_heX(int arg, t_flags *flag, int len)
 {
-	int	idx;
- 
-	idx = len;
-	arg = hex;
-
 	if (flag->left_align == 1)
 	{
 		if (flag->precision >= len)
+			align_integer(flag->precision - len);
+		ft_putheX(arg);
+		if (flag->precision > len && flag->width > flag->precision)
+			align(flag->width - flag->precision);
+		else if (flag->width - len > 0 && flag->width > flag->precision)
+			align(flag->width - len);
+	}
+	else if (flag->width <= flag->precision)
+		align_integer(flag->precision - len);
+	else
+	{
+		if (flag->precision > len && flag->width > len)
 		{
+			align (flag->width - flag->precision);
 			align_integer(flag->precision - len);
 		}
+		else if (flag->width > len)
+			align (flag->width - len);
+	}
+	if (flag->left_align == 0)
 		ft_putheX(arg);
-		if (flag->precision >= 0 && flag->width > flag->precision)
-		{
-			if (flag->precision > len)
-			{
-				if (flag->width - flag->precision > 0)
-					align(flag->width - flag->precision);
-			}
-			else if (flag->precision <= len)
-			{
-			 	if (flag->width - len > 0)
-					align(flag->width - len);
-			}
-		}
-		return (flag->precision);
-	}
-	else if (flag->width >= flag->precision)
-	{
-		if (flag->width > len)
-		{
-			if (flag->precision > len)
-			{
-				align (flag->width - flag->precision);
-				align_integer(flag->precision - len);
-			}
-			else 
-			{
-				align (flag->width - len);
-			}
-			ft_putheX(arg);
-			return (flag->width);
-		}
-		ft_putheX(arg);
-		return (len);
-	}
-	else if (flag->width < flag->precision)
-	{
-		if (flag->precision > len)
-			align_integer(flag->precision - len);
-		ft_putheX(hex);
-		return (flag->precision);
-	}
-	else if (flag->precision < len && flag->width >= 0)
-	{
-		ft_putheX(arg);
-		return (idx);
-	}
-	else 
-		align_heX(flag, len, hex);
-	return (-1);
 }

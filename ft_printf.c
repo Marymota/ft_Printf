@@ -14,13 +14,6 @@ int	ft_printf(const char *format, ...)
 	return (done);
 }
 
-//int main ()
-//{
-//	printf("idx: %i ", printf("%ps", NULL));
-//	printf("\n");
-//	printf("idx: %i ", ft_printf("%ps", NULL));
-//}
-
 int	parse_format(const char *fmt, va_list args, t_flags *flag, int idx)
 {
 	init(flag);

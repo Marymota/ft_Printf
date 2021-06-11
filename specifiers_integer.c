@@ -10,9 +10,7 @@ int	printf_p (va_list args, t_flags *flag, int idx)
 	if (address != 0)
 	{
 		if (flag->width == 0 && flag->precision == -1)
-		{
 			idx = parse_hexadecimal(address, flag);
-		}
 		else if (flag->width > 0 && flag->left_align == 0)
 			idx = parse_hexadecimal(address, flag);
 		write (1, "0x", 2);
@@ -20,19 +18,15 @@ int	printf_p (va_list args, t_flags *flag, int idx)
 	}
 	else if (address == 0)
 	{
-		if (flag->left_align == 1)
-			write (1, "(nil)", 5);
-		else if (flag->left_align == 0)
-		{
+		if (flag->left_align == 0)
 			idx = parse_hexadecimal(address, flag);
-			write (1, "(nil)", 5);
-		}
+		write (1, "(nil)", 5);
 	}
 	if (flag->width > 0 && flag->left_align == 1)
 		idx = parse_hexadecimal(address, flag);
 	if (address == 0 && (flag->width == 0 && flag->precision == -1))
 		return (5);
-	return(idx);
+	return (idx);
 }
 
 int	printf_d (va_list args, t_flags *flag, int idx)
@@ -46,66 +40,37 @@ int	printf_d (va_list args, t_flags *flag, int idx)
 	if (minus)
 		arg = -arg;
 	len = int_size(arg);
-
 	if ((flag->width > len + minus) && (flag->left_align == 0))
 	{
-		if ((flag->width > len + minus && flag->width > flag->precision))
+		if (flag->width > flag->precision)
 		{
 			if (arg != 0 && flag->precision == 0)
-				align (flag->width - (len + minus));
-			else if (flag->precision > len + minus)
-				align (flag->width - (flag->precision + minus));
+				align (flag->width - len - minus);
+			else if (flag->precision >= len + minus)
+				align (flag->width - flag->precision - minus);
 			else if (flag->width >= len && flag->precision > 0)
 			{
-				if (flag->zero == 1 && flag->precision <= len)
-					align (flag->width - (len + minus));
-				else if (flag->width - flag->precision + minus > len)
-				{
-					if (flag->precision < len + minus)
-						align (flag->width - (len + minus));
-					else if (flag->precision >= len + minus)
-						align (flag->width - (flag->precision  + minus));
-				}
-				else if (flag->width > flag->precision)
-				{
-					if (flag->width - flag->precision > 0 && flag->precision == len)
-					{
-						align(flag->width - len);
-					}
-					else if (flag->precision < len + minus)
-					{
-						align(flag->width - len);
-					}
-				}
+				if (flag->zero == 1 || (flag->precision < len + minus && arg != 0))
+					align (flag->width - len - minus);
 			}
 		}
 	}
-
 	if (no_precision_integer(arg, flag))
 	{
-		if (flag->width >= len && flag->left_align == 0)
-			return (flag->width);
-		else if (arg == 0 && flag->precision <= 0)
-		{
-			if ((flag->left_align == 1 && flag->width > 0) && flag->precision == 0)
-				return (flag->width);
-			else if (flag->precision == 0 && (flag->left_align == 0 || flag->zero == 0))
-				return (0);
-			else if ((flag->left_align == 1 || flag->zero == 1) && (flag->width == 0 && flag->precision == 0))
-				return (0);
-		}
+		if (flag->width >= len || (flag->width > 0 && flag->precision == 0))
+			return (flag->width + minus);
+		else if (arg == 0 && (flag->precision == 0 && flag->width == 0))
+			return (0);
 	}
 	if (flag->precision == flag->width)
 		parse_width_integer(arg, flag, minus, len);
-	if (flag->width && flag->precision == flag->width)
+	if (flag->precision == flag->width)
 	{
 		if (len >= flag->width)
 			return (len + minus);
 		else if (len < flag->width)
 			return (flag->width + minus);
 	}
-	else if (flag->precision == flag->width)
-		return (len + minus);
 	printf_precision_integer(arg, flag, minus, len);
 	return (return_integer(flag, idx, len, minus));
 }
@@ -177,7 +142,8 @@ int	printf_x (va_list args, t_flags *flag, int idx)
 		else 
 			return (len);
 	}
-	idx = parse_precision_hex(arg, flag, len, hex);
+	parse_precision_hex(arg, flag, len);
+	idx = len;
 	return (return_x(flag, idx, len));
 }
 
@@ -224,6 +190,7 @@ int	printf_X (va_list args, t_flags *flag, int idx)
 		else 
 			return (len);
 	}
-	idx = parse_precision_heX(arg, flag, len, hex);
+	parse_precision_heX(arg, flag, len);
+	idx = len;
 	return (return_x(flag, idx, len));
 }
