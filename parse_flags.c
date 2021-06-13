@@ -1,5 +1,15 @@
 #include "ft_printf.h"
 
+int	flags_check(const char *fmt)
+{
+	if (*fmt == '-' || *fmt == '*' || *fmt == '.')
+		return (1);
+	else if (ft_isdigit(*fmt))
+		return (1);
+	else
+		return (0);
+}
+
 int	get_flags(const char *format, va_list args, t_flags *flag)
 {
 	if (*format == '-')
@@ -18,16 +28,6 @@ int	get_flags(const char *format, va_list args, t_flags *flag)
 	return (1);
 }
 
-int	flags_check(const char *fmt)
-{
-	if (*fmt == '-' || *fmt == '*' || *fmt == '.')
-		return (1);
-	else if (ft_isdigit(*fmt))
-		return (1);
-	else
-		return (0);
-}
-
 void	parse_asterisk(const char *format, va_list args, t_flags *flag)
 {
 	if (flag->precision >= 0)
@@ -42,4 +42,30 @@ void	parse_asterisk(const char *format, va_list args, t_flags *flag)
 		flag->width = flag->width * -1;
 		flag->left_align = 1;
 	}
+}
+
+int	count_width(const char *format, va_list args, t_flags *flag)
+{
+	int	width;
+
+	width = 0;
+	if (flag->asterisk == 1)
+	{
+		flag->asterisk = va_arg(args, int);
+		return (flag->asterisk);
+	}
+	if (ft_isdigit(*format))
+	{
+		while (ft_isdigit(*format))
+		{
+			width = width * 10 + (*format - '0');
+			++format;
+		}
+	}
+	return (width);
+}
+
+int	ft_isdigit(int c)
+{
+	return (c >= '0' && c <= '9');
 }

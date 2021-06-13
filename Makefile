@@ -4,7 +4,20 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 AR = ar rcs
 
-SRCS = $(wildcard *.c)
+SRCS =	ft_printf.c \
+		parse_flags.c \
+		specifiers_string.c \
+		specifiers_integer.c \
+		printf_integer.c \
+		printf_string.c \
+		printf_unsigned.c \
+		printf_address.c \
+		printf_hex.c \
+		printf_heX.c \
+		ft_put.c \
+		utils_align.c \
+		utils_int.c
+
 OBJS = $(SRCS:.c=.o)
 
 all:		$(NAME)

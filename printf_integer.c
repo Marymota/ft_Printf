@@ -14,6 +14,16 @@ int	no_precision_integer(int arg, t_flags *flag)
 
 void	parse_width_integer(int arg, t_flags *flag, int minus, int len)
 {
+	if ((flag->width > len + minus && flag->width > flag->precision))
+	{
+		if (arg != 0 && flag->precision == 0)
+			align (flag->width - len - minus);
+		else if (flag->precision >= len + minus)
+			align (flag->width - flag->precision - minus);
+		else if (flag->width >= len && flag->precision > 0)
+			if (flag->zero == 1 || (flag->precision < len + minus && arg != 0))
+				align (flag->width - len - minus);
+	}
 	if (flag->precision == flag->width)
 	{
 		if (minus == 1)
