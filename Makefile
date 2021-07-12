@@ -12,8 +12,8 @@ SRCS =	ft_printf.c \
 		printf_string.c \
 		printf_unsigned.c \
 		printf_address.c \
-		printf_hex.c \
-		printf_heX.c \
+		printf_lowhex.c \
+		printf_uphex.c \
 		ft_put.c \
 		utils_align.c \
 		utils_int.c

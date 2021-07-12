@@ -1,6 +1,6 @@
 #include "ft_printf.h"
 
-int	parse_precision_string (char *arg, t_flags *flag)
+int	parse_precision_string(char *arg, t_flags *flag)
 {
 	int	idx;
 	int	len;
@@ -26,7 +26,7 @@ int	parse_precision_string (char *arg, t_flags *flag)
 	return (idx);
 }
 
-int	parse_width_string (char *arg, t_flags *flag)
+int	parse_width_string(char *arg, t_flags *flag)
 {
 	int	idx;
 	int	len;
@@ -94,25 +94,28 @@ int	return_string(t_flags *flag, int idx, int len)
 
 int	return_null(t_flags *flag)
 {
+	if (flag->width == 0)
+	{
+		return (0);
+	}
 	if (flag->precision <= 0)
 	{
 		if (flag->width == 0 && flag->precision == 0)
 			return (0);
-		else if (flag->width > 6 && flag->precision == -1)
-			align(flag->width - 6);
+		else if (flag->width > 0)
+			align(flag->width);
+		return (flag->width);
 	}
 	else if (flag->width < flag->precision && flag->precision < 6)
 	{
 		align(flag->width);
 		return (flag->width);
 	}
-	ft_putstr_fd("(null)", 1);
-	if (flag->left_align == 1 && flag->precision > 6)
+	if (flag->left_align == 1 && flag->precision > 0)
 	{
-		align(flag->width - 6);
+		printf("(");
+		align(flag->width - 1);
 		return (flag->width);
 	}
-	if (flag->width > 6)
-		return (flag->width);
-	return (6);
+	return (1);
 }

@@ -37,8 +37,9 @@ void	printf_precision_integer(int arg, t_flags *flag, int minus, int len)
 {
 	if (flag->zero == 0 && flag->precision <= 0)
 	{
-		if (flag->width > (len + minus) && flag->precision < 0 && !flag->left_align)
-			align(flag->width - (len + minus));
+		if (flag->width > (len + minus) && flag->precision < 0)
+			if (!flag->left_align)
+				align(flag->width - (len + minus));
 		if (flag->precision <= 0)
 			if (minus == 1)
 				ft_putchar_fd('-', 1);

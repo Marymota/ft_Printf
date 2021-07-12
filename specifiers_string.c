@@ -1,6 +1,6 @@
 #include "ft_printf.h"
 
-int	printf_c (va_list args, t_flags *flag, int idx)
+int	printf_c(va_list args, t_flags *flag, int idx)
 {
 	int	arg;
 
@@ -17,14 +17,14 @@ int	printf_c (va_list args, t_flags *flag, int idx)
 	return (idx);
 }
 
-int	printf_s (va_list args, t_flags *flag, int idx)
+int	printf_s(va_list args, t_flags *flag, int idx)
 {
 	char	*arg;
 	int		len;
 
 	arg = va_arg(args, char *);
 	if (arg == NULL)
-		return (return_null(flag));
+		arg = "(null)";
 	len = ft_strlen(arg);
 	if (flag->precision >= 0)
 		parse_precision_string(arg, flag);

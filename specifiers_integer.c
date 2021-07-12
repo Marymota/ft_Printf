@@ -1,13 +1,21 @@
 #include "ft_printf.h"
 
-int	printf_p (va_list args, t_flags *flag, int idx)
+int	printf_p(va_list args, t_flags *flag, int idx)
 {
 	void	*arg;
 	ssize_t	address;
 
 	arg = va_arg(args, void *);
 	address = (ssize_t)(arg);
-	if (address != 0)
+	if (address == 0)
+	{
+		if (flag->width <= 0)
+			return (write (1, "0x0", 3));
+		else if (flag->left_align == 0)
+			idx = parse_hexadecimal(address, flag);
+		write (1, "0x0", 3);
+	}
+	else if (address != 0)
 	{
 		if (flag->width == 0 && flag->precision == -1)
 			idx = parse_hexadecimal(address, flag);
@@ -16,20 +24,12 @@ int	printf_p (va_list args, t_flags *flag, int idx)
 		write (1, "0x", 2);
 		ft_putaddr(address);
 	}
-	else if (address == 0)
-	{
-		if (flag->left_align == 0)
-			idx = parse_hexadecimal(address, flag);
-		write (1, "(nil)", 5);
-	}
 	if (flag->width > 0 && flag->left_align == 1)
 		idx = parse_hexadecimal(address, flag);
-	if (address == 0 && (flag->width == 0 && flag->precision == -1))
-		return (5);
 	return (idx);
 }
 
-int	printf_d (va_list args, t_flags *flag, int idx)
+int	printf_d(va_list args, t_flags *flag, int idx)
 {
 	int	arg;
 	int	len;
@@ -57,7 +57,7 @@ int	printf_d (va_list args, t_flags *flag, int idx)
 	return (return_integer(flag, idx, len, minus));
 }
 
-int	printf_u (va_list args, t_flags *flag, int idx)
+int	printf_u(va_list args, t_flags *flag, int idx)
 {
 	size_t	arg;
 	int		len;
@@ -81,7 +81,7 @@ int	printf_u (va_list args, t_flags *flag, int idx)
 	return (return_unsigned(arg, flag, len));
 }
 
-int	printf_x (va_list args, t_flags *flag, int idx)
+int	printf_x(va_list args, t_flags *flag, int idx)
 {
 	int		arg;
 	size_t	hex;
@@ -107,7 +107,7 @@ int	printf_x (va_list args, t_flags *flag, int idx)
 	return (return_x(flag, idx));
 }
 
-int	printf_X (va_list args, t_flags *flag, int idx)
+int	printf_X(va_list args, t_flags *flag, int idx)
 {
 	int		arg;
 	size_t	hex;

@@ -27,17 +27,17 @@ void	parse_asterisk(const char *format, va_list args, t_flags *flag);
 int		count_width(const char *format, va_list args, t_flags *flag);
 int		ft_isdigit(int c);
 //	specifiers_string
-int		printf_c (va_list args, t_flags *flag, int idx);
-int		printf_s (va_list args, t_flags *flag, int idx);
+int		printf_c(va_list args, t_flags *flag, int idx);
+int		printf_s(va_list args, t_flags *flag, int idx);
 //	specifiers_integer
-int		printf_p (va_list args, t_flags *flag, int idx);
-int		printf_d (va_list args, t_flags *flag, int idx);
-int		printf_u (va_list args, t_flags *flag, int idx);
-int		printf_x (va_list args, t_flags *flag, int idx);
-int		printf_X (va_list args, t_flags *flag, int idx);
+int		printf_p(va_list args, t_flags *flag, int idx);
+int		printf_d(va_list args, t_flags *flag, int idx);
+int		printf_u(va_list args, t_flags *flag, int idx);
+int		printf_x(va_list args, t_flags *flag, int idx);
+int		printf_X(va_list args, t_flags *flag, int idx);
 //	printf_string
-int		parse_precision_string (char *arg, t_flags *flag);
-int		parse_width_string (char *arg, t_flags *flag);
+int		parse_precision_string(char *arg, t_flags *flag);
+int		parse_width_string(char *arg, t_flags *flag);
 int		printf_truncate(char *arg, t_flags *flag);
 int		return_string(t_flags *flag, int idx, int len);
 int		return_null(t_flags *flag);

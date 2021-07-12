@@ -48,18 +48,15 @@ int	parse_hexadecimal(ssize_t address, t_flags *flag)
 
 	len = count_addr(address) + 2;
 	idx = len;
-	if (flag->width > (len))
+	if (address == 0)
 	{
-		if (address == 0)
-		{
-			idx = flag->width;
-			align(flag->width - 5);
-		}
-		else if (flag->width - len > 0)
-		{
-			idx = flag->width;
-			align(flag->width - len);
-		}
+		idx = flag->width;
+		align(flag->width - 3);
+	}
+	else if (flag->width - len > 0)
+	{
+		idx = flag->width;
+		align(flag->width - len);
 	}
 	return (idx);
 }
